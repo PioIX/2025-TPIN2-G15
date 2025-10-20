@@ -1,0 +1,14 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Propuesta de luedo",
+  "main": "mysql.js",
+  "scripts": {
+    "test": "nodemon mysql.js"
+  },
+  "keywords": [
+    "ES"
+  ],
+  "author": "Thiago Enriquez, Felipe Cogorno, Ezequiel Ramirez y Maximo Jimenez.",
+  "license": "ISC"
+}
