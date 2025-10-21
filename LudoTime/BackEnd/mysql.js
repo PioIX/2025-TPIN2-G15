@@ -1,4 +1,4 @@
-import { pool } from "./database/connectionMySQL";
+import { pool } from "./database/connectionMySQL.js";
 
 const getData = async () => {
     try{
