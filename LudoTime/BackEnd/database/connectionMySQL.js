@@ -9,9 +9,12 @@ export const pool = createPool({
     charset: 'UTF8_GENERAL_CI'
 });
 
-try {
-    const [rows] = await pool.query('SELECT 1');
-    console.log('✅ Conexión MySQL exitosa');
-} catch (error) {
-    console.error('❌ Error al conectar con MySQL:', error);
+const prueba = async () => {try {
+        const [rows] = await pool.query('SELECT 1');
+        console.log('✅ Conexión MySQL exitosa', rows);
+    } catch (error) {
+        console.error('❌ Error al conectar con MySQL:', error);
+    };
 }
+
+prueba();
