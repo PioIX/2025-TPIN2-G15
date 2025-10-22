@@ -1,15 +1,15 @@
 "use client";
 import styles from "./page.module.css";
+import Head from "next/head";
 
 export default function renderdementira() {
   const handleClick = () => {
     window.location.href = "/login";
   };
 
-  return (
+  return (    
     <div className={styles.container} onClick={handleClick}>
       <div className={styles.overlay}>
-        <h1 className={styles.title}>LudoTime</h1>
         <div className={styles.rectangle}>
           <p>Clickea para continuar</p>
         </div>

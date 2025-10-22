@@ -4,7 +4,7 @@
   "description": "Dependencias para bases de datos del ludo.",
   "main": "mysql.js",
   "scripts": {
-    "test": "nodemon mysql.js"
+    "pio": "nodemon --env-file=.pio.env mysql.js"
   },
   "type": "module",
   "keywords": [

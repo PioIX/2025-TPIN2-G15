@@ -1,4 +1,26 @@
 .body {
     margin: 0;
-    /*background-image: url('../../public/assets/fondo-home.png');*/
+    /*background-image: url('../../public/assets/homeBgImage.png');*/
+}
+
+.container {
+    padding-left: 125px;
+}
+
+.playbtn, .shopbtn, .scoresbtn {
+    padding: 20px;
+    background-color: white;
+    border-color: black;
+    height: 70px;
+    width: 700px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    font-size: 18px;
+}
+.title {
+    margin-bottom: 20px;
+    padding-top: 200px;
 }
