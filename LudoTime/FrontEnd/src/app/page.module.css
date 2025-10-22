@@ -1,7 +1,7 @@
 .container {
   height: 100vh;
   width: 100%;
-  /*background-image: url('../../public/assets');*/
+  background-image: url('../../public/assets/mainBgImage.png');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -24,12 +24,18 @@
 }
 
 .rectangle {
-  background: rgba(128, 128, 128, 0.5);
+  background: rgba(238, 175, 235, 0.26);
   padding: 15px 40px;
   border-radius: 20px;
   display: inline-block;
-  font-size: 1.2rem;
+  font-size: 1.75rem;
   animation: pulse 2s infinite;
+  margin-top: 350px;
+  width: 1500px;
+  height: 80px;
+  font-weight: bold;
+  border-color: transparent;
+  border-style: solid;
 }
 
 @keyframes pulse {

@@ -9,10 +9,9 @@ export default function LoginPage() {
   return (
     <div
       className={styles.container}
-      style={{ backgroundImage: `url(${fondo.src})` }}
     >
       <div className={styles.card}>
-        <Image src={logo} alt="LudoTime" className={styles.logo} />
+        <img src={'../../../public/assets/mainLogo.png'} alt="LudoTime" className={styles.logo}/>
         <h2 className={styles.title}>Login</h2>
 
         <form className={styles.form}>
