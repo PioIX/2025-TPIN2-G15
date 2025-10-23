@@ -1,0 +1,35 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-image: url("../../../public/assets/bgImageRed.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: 80px;
+}
+
+.localbtn, .onlinebtn, .tutobtn {
+    padding: 20px;
+    background-color: rgb(247, 126, 126);
+    border-color: rgba(243, 164, 164, 0.993);
+    border-style: solid;
+    border-width: 7.5px;
+    height: 400px;
+    width: 600px;
+    text-align: center;
+    align-items: center;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    font-size: 25px;
+    font-weight:  bold;
+}
+
+.localbtn {
+    margin-right: 20px;
+}
+
+.onlinebtn {
+    margin-right: 20px;
+}
