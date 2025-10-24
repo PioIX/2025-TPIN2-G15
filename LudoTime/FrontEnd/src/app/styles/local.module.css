@@ -4,16 +4,16 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-image: url("../../../public/assets/bgImageRed.png");
+  background-image: url("../../../public/assets/bgImageBlue.png");
   background-size: cover;
   background-repeat: no-repeat;
   padding: 80px;
 }
 
-.localbtn, .onlinebtn, .tutobtn {
+.classicbtn, .mathbtn, .timebtn {
   padding: 20px;
-  background-color: rgb(247, 126, 126);
-  border-color: rgba(243, 164, 164, 0.993);
+  background-color: rgb(113, 115, 226);
+  border-color: rgba(164, 172, 243, 0.993);
   border-style: solid;
   border-width: 7.5px;
   height: 600px;
@@ -29,21 +29,40 @@
   justify-content: center;
   overflow: hidden;
   transition: all 0.3s ease;
+  
 }
 
-.localbtn {
+.classicbtn {
   margin-right: 40px;
+  background-image: url("../../../public/assets/classicimage.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: white;
 }
 
-.onlinebtn {
+.mathbtn {
   margin-right: 40px;
+  background-image: url("../../../public/assets/mathimage.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: white;
 }
 
-.localbtn:hover, .onlinebtn:hover, .tutobtn:hover {
+.timebtn {
+    background-image: url("../../../public/assets/timeimage.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: white;
+}
+
+.classicbtn:hover, .mathbtn:hover, .timebtn:hover {
   width: 1000px; /* tamano al poner el mouse por encima */
 }
 
-.localbtn::after, .onlinebtn::after, .tutobtn::after {
+.classicbtn::after, .mathbtn::after, .timebtn::after {
   font-size: 18px;
   color: black;
   opacity: 0;
@@ -51,18 +70,19 @@
   transition: opacity 0.3s ease;
 }
 
-.localbtn::after {
+.classicbtn::after {
     content: "Descripción del modo"; /* Aquí puedes agregar el texto de la descripción */
 }
 
-.onlinebtn::after {
+.mathbtn::after {
     content: "Descripción del modo"; /* Aquí puedes agregar el texto de la descripción */
 }
 
-.tutobtn::after {
+.timebtn::after {
     content: "Descripción del modo"; /* Aquí puedes agregar el texto de la descripción */
 }
 
-.localbtn:hover::after, .onlinebtn:hover::after, .tutobtn:hover::after {
+.classicbtn:hover::after, .mathbtn:hover::after, .timebtn:hover::after {
   opacity: 1;
 }
+
