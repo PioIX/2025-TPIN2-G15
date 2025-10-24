@@ -2,32 +2,36 @@
 
 import Image from "next/image";
 import styles from "../styles/LoginRegister.module.css";
-/*import logo from "/public/assets/ludotime-logo.png";
-import fondo from "/public//assets/fondo-dados.png";*/
+import logo from "../../../public/assets/mainLogo.png";
 
 export default function LoginPage() {
   return (
-    <div
-      className={styles.container}
-      style={{ backgroundImage: `url(${fondo.src})` }}
-    >
+    <div className={styles.container}>
+      <Image
+        src={logo}
+        alt="LudoTime"
+        className={styles.logo}
+        priority
+      />
+
       <div className={styles.card}>
-        <Image src={logo} alt="LudoTime" className={styles.logo} />
         <h2 className={styles.title}>Login</h2>
 
-        <form className={styles.form}>
+        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
           <input
             type="email"
             placeholder="Ingrese su correo electrónico..."
             className={styles.input}
+            required
           />
           <input
             type="password"
-            placeholder="Ingrese su contraseña..."
+            placeholder="Ingrese una contraseña..."
             className={styles.input}
+            required
           />
           <button type="submit" className={styles.button}>
-            Iniciar Sesión
+            Iniciar Sesion
           </button>
         </form>
       </div>

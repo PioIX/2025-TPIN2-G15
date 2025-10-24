@@ -10,9 +10,7 @@ export default function renderdementira() {
   return (    
     <div className={styles.container} onClick={handleClick}>
       <div className={styles.overlay}>
-        <div className={styles.rectangle}>
-          <p>Clickea para continuar</p>
-        </div>
+        <button className={styles.rectangle}>Clickea para continuar</button>
       </div>
     </div>
   );

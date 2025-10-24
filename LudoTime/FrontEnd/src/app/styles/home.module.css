@@ -1,20 +1,28 @@
 .body {
     margin: 0;
-    /*background-image: url('../../public/assets/homeBgImage.png');*/
+    background-image: url('../../../public/assets/homeB.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    background-repeat: no-repeat
 }
 
 .container {
+    padding-top: 100px;
     padding-left: 125px;
 }
 
 .playbtn, .shopbtn, .scoresbtn {
     padding: 20px;
     background-color: white;
-    border-color: black;
+    border-color: rgba(113, 27, 124, 0.993);
+    border-style: solid;
+    border-width: 7.5px;
     height: 70px;
-    width: 700px;
+    width: 600px;
     text-align: center;
-    justify-content: center;
     align-items: center;
     margin-bottom: 10px;
     border-radius: 20px;
