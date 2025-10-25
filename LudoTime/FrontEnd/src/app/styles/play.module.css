@@ -8,61 +8,308 @@
   background-size: cover;
   background-repeat: no-repeat;
   padding: 80px;
+  gap: 40px;
 }
 
-.localbtn, .onlinebtn, .tutobtn {
-  padding: 20px;
-  background-color: rgb(247, 126, 126);
-  border-color: rgba(243, 164, 164, 0.993);
-  border-style: solid;
-  border-width: 7.5px;
+
+.card {
+  position: relative;
   height: 600px;
   width: 400px;
-  text-align: center;
-  align-items: center;
-  margin-bottom: 10px;
   border-radius: 20px;
-  font-size: 25px;
-  font-weight: bold;
+  overflow: hidden;
+  background-color: rgb(241, 147, 147);
+  border: 7.5px solid rgba(255, 255, 255, 0.6);
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card:hover {
+  width: 1000px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease;
+}
+
+.card:hover .overlay {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: white;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-  transition: all 0.3s ease;
+  align-items: center;
+  gap: 12px;
 }
 
-.localbtn {
-  margin-right: 40px;
+.title {
+  font-size: 30px;
+  font-weight: 900;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  letter-spacing: 2px;
 }
 
-.onlinebtn {
-  margin-right: 40px;
-}
-
-.localbtn:hover, .onlinebtn:hover, .tutobtn:hover {
-  width: 1000px; /* tamano al poner el mouse por encima */
-}
-
-.localbtn::after, .onlinebtn::after, .tutobtn::after {
+.desc {
   font-size: 18px;
-  color: black;
+  font-weight: 600;
   opacity: 0;
-  margin-top: 30px;
-  transition: opacity 0.3s ease;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.3s ease;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 14px;
+  border-radius: 12px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
-.localbtn::after {
-    content: "Descripción del modo"; /* Aquí puedes agregar el texto de la descripción */
-}
-
-.onlinebtn::after {
-    content: "Descripción del modo"; /* Aquí puedes agregar el texto de la descripción */
-}
-
-.tutobtn::after {
-    content: "Descripción del modo"; /* Aquí puedes agregar el texto de la descripción */
-}
-
-.localbtn:hover::after, .onlinebtn:hover::after, .tutobtn:hover::after {
+/* no borrar, sino no se ve la descripcion */
+.card:hover .desc {
   opacity: 1;
+  transform: translateY(0);
 }
+
+
+
+
+
+
+
+
+/* INICIO DEL HAMBURGER MENU */
+
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px; /* ajustá según el tamaño del botón */
+  background-color: rgba(0, 0, 0, 0.9); /* igual que la barra lateral */
+  z-index: 999; /* por encima del contenido */
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+
+
+
+
+
+.toggle {
+  position: absolute;
+  left: -9999px;
+}
+
+/* Asegurate de que sub-menu quede arriba del botón cuando se abra */
+.sub-menu {
+  padding: 0 0 0 2%;
+  left: -300px;
+  top: 10%;
+  transition: all 0.3s ease;
+  height: 30%;
+  width: 300px;
+  position: fixed;
+  margin: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  border-radius: 0;
+  z-index: 1000; /* sube el z-index */
+  overflow: hidden;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Abrir menú cuando el checkbox está checkeado */
+.toggle:checked ~ .sub-menu {
+  left: 0;
+}
+
+/* LISTA SIN ESTILOS (usando module) */
+.list-unstyled {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sub-menu li {
+  display: block;
+  height: auto;
+  margin-left: 0;
+  padding: 10px 0;
+  transition: all 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+
+.sub-menu li:first-child {
+  margin-top: 100px;
+}
+
+.sub-menu li a {
+  color: #fff;
+  font-size: 16px;
+  width: 100%;
+  display: block;
+  text-transform: uppercase;
+  line-height: 30px;
+  text-decoration: none;
+}
+
+.sub-menu li a:hover {
+  font-weight: bold;
+}
+
+/* HAMBURGER (coincide con el HTML: --htx con doble guión) */
+.c-hamburger {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin: 10px;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  z-index: 1100; /* por encima del nav cerrado */
+  font-size: 0;
+  text-indent: -9999px;
+  appearance: none;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.c-hamburger:focus {
+  outline: none;
+}
+
+.c-hamburger span {
+  display: block;
+  position: absolute;
+  top: 16px;      /* ajusté un poco para centrar */
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: white;
+}
+
+.c-hamburger span:before,
+.c-hamburger span:after {
+  position: absolute;
+  display: block;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: white;
+  content: "";
+}
+
+.c-hamburger span:before { top: -10px; }
+.c-hamburger span:after  { bottom: -10px; }
+
+/* Variante --htx (doble guión) */
+.c-hamburger--htx span {
+  transition: background 0s 0.3s;
+}
+.c-hamburger--htx span:before,
+.c-hamburger--htx span:after {
+  transition-duration: 0.3s, 0.3s;
+  transition-delay: 0.3s, 0s;
+}
+.c-hamburger--htx span:before { transition-property: top, transform; }
+.c-hamburger--htx span:after  { transition-property: bottom, transform; }
+
+/* Estado activo → cuando el checkbox está chequeado
+   (input + label + nav → usamos el hermano adyacente `+` para el label) */
+.toggle:checked + .c-hamburger--htx span {
+  background: none;
+}
+.toggle:checked + .c-hamburger--htx span:before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.toggle:checked + .c-hamburger--htx span:after {
+  bottom: 0;
+  transform: rotate(-45deg);
+}
+
+/* Posicioná el botón visible SIEMPRE */
+.c-hamburger {
+  position: fixed;      /* antes era relative */
+  top: 14px;
+  left: 14px;
+  width: 36px;
+  height: 36px;
+  z-index: 1100;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* Hacé visible las barritas (antes eran blancas y tu fondo es blanco) */
+.c-hamburger span,
+.c-hamburger span::before,
+.c-hamburger span::after {
+  background: #ffffff;  /* morado oscuro (o negro) */
+}
+
+/* ====== MENU LATERAL ====== */
+.sub-menu {
+  position: fixed;
+  top: 0;            /* baja un poco para no tapar el botón */
+  left: -320px;         /* fuera de pantalla */
+  width: 300px;
+  height: 40%;
+  background: rgba(0,0,0,.9);
+  color: #fff;
+  transition: left .3s ease;
+  z-index: 1000;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+}
+
+/* AHORA SÍ: cuando el componente agrega la clase, se abre */
+.sub-menu.oppenned {
+  left: 0;
+}
+
+/* Lista sin estilos (Module) */
+.list-unstyled { margin: 0; padding: 0; list-style: none; }
+.sub-menu li    { padding: 10px 0; }
+.sub-menu a     { color: #fff; text-decoration: none; text-transform: uppercase; }
+
+/* ====== ANIMACIÓN DEL ÍCONO A "X" USANDO .is-active ====== */
+.is-active span { background: none; }
+.is-active span::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.is-active span::after {
+  bottom: 0;
+  transform: rotate(-45deg);
+}
+
+/* Mantengo tus transiciones de la variante --htx */
+.c-hamburger--htx span { transition: background 0s .3s; }
+.c-hamburger--htx span::before,
+.c-hamburger--htx span::after {
+  transition-duration: .3s, .3s;
+  transition-delay: .3s, 0s;
+}
+.c-hamburger--htx span::before { transition-property: top, transform; }
+.c-hamburger--htx span::after  { transition-property: bottom, transform; }
+
+/* FIN DEL HAMBURGER MENU */
