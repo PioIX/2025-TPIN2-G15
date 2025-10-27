@@ -6,29 +6,37 @@ import { pool } from "./database/connectionMySQL.js";
 
 const app = express();
 
-// Middlewares
 app.use(cors());
 app.use(bodyParser.json());
 
-// 🧠 Al iniciar, muestra a qué base se conecta y qué tablas ve
+
+// ==================================================
+// Verif. conexión a BdD
+// ==================================================
 (async () => {
     try {
         const [dbRow] = await pool.query("SELECT DATABASE() AS db");
-        console.log(`🔌 Conectado a base de datos: ${dbRow[0].db}`);
+        console.log(`Conectado a la base de datos: ${dbRow[0].db}`);
 
         const [tables] = await pool.query(`
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = DATABASE()
     `);
-        console.log("📋 Tablas disponibles:", tables.map(t => t.table_name).join(", "));
+
+        console.log(
+            "Tablas detectadas:",
+            tables.map(t => t.table_name).join(", ")
+        );
     } catch (err) {
-        console.error("❌ Error comprobando conexión a MySQL:", err);
+        console.error("Error comprobando la conexión a MySQL:", err);
     }
 })();
 
 
-// ✅ REGISTER — Crea un nuevo usuario en UsuariosLT
+// ==================================================
+// Endpoint: Registro usuario (/api/register)
+// ==================================================
 app.post("/api/register", async (req, res) => {
     try {
         const { nombre, correo, contrasena } = req.body;
@@ -38,7 +46,7 @@ app.post("/api/register", async (req, res) => {
             return res.status(400).json({ ok: false, msg: "Faltan campos requeridos" });
         }
 
-        // Verificar si ya existe el correo
+        // Verificar si el correo ya existe
         const [existRows] = await pool.query(
             "SELECT idUsuarios FROM UsuariosLT WHERE correo = ? LIMIT 1",
             [correo]
@@ -48,7 +56,7 @@ app.post("/api/register", async (req, res) => {
             return res.status(409).json({ ok: false, msg: "El correo ya está registrado" });
         }
 
-        // Hashear contraseña
+        // Encriptar contraseña
         const hashed = await bcrypt.hash(contrasena, 10);
 
         // Insertar nuevo usuario
@@ -63,7 +71,7 @@ app.post("/api/register", async (req, res) => {
             id_usuario: insertResult.insertId,
         });
     } catch (err) {
-        console.error("❌ Error en /api/register:", {
+        console.error("Error en /api/register:", {
             code: err.code,
             errno: err.errno,
             sqlState: err.sqlState,
@@ -78,7 +86,61 @@ app.post("/api/register", async (req, res) => {
 });
 
 
-// 🧪 Endpoint de debug: muestra DB y columnas reales de UsuariosLT
+// ==================================================
+// Endpoint: Login usuario (/api/login)
+// ==================================================
+app.post("/api/login", async (req, res) => {
+    try {
+        const { correo, contrasena } = req.body;
+
+        if (!correo || !contrasena) {
+            return res.status(400).json({ ok: false, msg: "Faltan credenciales" });
+        }
+
+        // Buscar usuario por correo
+        const [rows] = await pool.query(
+            "SELECT idUsuarios, nombre, correo, contrasena FROM UsuariosLT WHERE correo = ? LIMIT 1",
+            [correo]
+        );
+
+        if (rows.length === 0) {
+            return res.status(401).json({ ok: false, msg: "Correo o contraseña incorrectos" });
+        }
+
+        const user = rows[0];
+
+        // Comparar contraseñas
+        const valid = await bcrypt.compare(contrasena, user.contrasena);
+        if (!valid) {
+            return res.status(401).json({ ok: false, msg: "Correo o contraseña incorrectos" });
+        }
+
+        // Inicio de sesión exitoso
+        return res.json({
+            ok: true,
+            msg: "Login exitoso",
+            user: {
+                id: user.idUsuarios,
+                nombre: user.nombre,
+                correo: user.correo,
+            },
+        });
+    } catch (err) {
+        console.error("Error en /api/login:", {
+            code: err.code,
+            errno: err.errno,
+            sqlState: err.sqlState,
+            sqlMessage: err.sqlMessage,
+            sql: err.sql,
+        });
+        return res.status(500).json({ ok: false, msg: "Error en el servidor" });
+    }
+});
+
+
+// ==================================================
+// Endpoint de depu. (/api/_debug/usuarioslt)
+// ==================================================
 app.get("/api/_debug/usuarioslt", async (_req, res) => {
     try {
         const [db] = await pool.query("SELECT DATABASE() AS db");
@@ -90,8 +152,11 @@ app.get("/api/_debug/usuarioslt", async (_req, res) => {
 });
 
 
-// Servidor
+// ==================================================
+// Inicialización del server de loan
+// ==================================================
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () =>
-    console.log(`✅ API escuchando en puerto ${PORT} [env=${process.env.NODE_ENV}]`)
-);
+
+app.listen(PORT, () => {
+    console.log(`Servidor API escuchando en el puerto ${PORT} [env=${process.env.NODE_ENV}]`);
+});
