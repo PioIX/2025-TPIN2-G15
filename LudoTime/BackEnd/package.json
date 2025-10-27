@@ -4,7 +4,8 @@
   "description": "Dependencias para bases de datos del ludo.",
   "main": "mysql.js",
   "scripts": {
-    "pio": "nodemon --env-file=.pio.env mysql.js"
+    "pio": "nodemon --env-file=.pio.env mysql.js",
+    "home": "nodemon --env-file=.home.env server.js"
   },
   "type": "module",
   "keywords": [
@@ -13,6 +14,7 @@
   "author": "Thiago Enriquez, Felipe Cogorno, Ezequiel Ramirez y Maximo Jimenez.",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

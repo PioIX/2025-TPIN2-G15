@@ -2,39 +2,48 @@
 
 import Image from "next/image";
 import styles from "../styles/LoginRegister.module.css";
-import logo from "../../../public/assets/mainLogo.png";
 
 export default function LoginPage() {
   return (
-    <div className={styles.container}>
-      <Image
-        src={logo}
-        alt="LudoTime"
-        className={styles.logo}
-        priority
-      />
+    <main className={styles.screen}>
+      <div className={styles.bg} />
+      <div className={styles.tint} />
 
-      <div className={styles.card}>
-        <h2 className={styles.title}>Login</h2>
+      <section className={styles.cardWrap}>
+        <div className={styles.logoHolder}>
+          <Image
+            src="/assets/mainLogo.png"
+            alt="LudoTime"
+            fill
+            sizes="320px"
+            priority
+            className={styles.logoImg}
+          />
+        </div>
 
-        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
+        <div className={styles.card}>
+          <h1 className={styles.title}>Login</h1>
+
           <input
+            className={styles.input}
             type="email"
             placeholder="Ingrese su correo electrónico..."
-            className={styles.input}
-            required
           />
+
           <input
-            type="password"
-            placeholder="Ingrese una contraseña..."
             className={styles.input}
-            required
+            type="password"
+            placeholder="Ingrese un contraseña..."
           />
-          <button type="submit" className={styles.button}>
-            Iniciar Sesion
-          </button>
-        </form>
-      </div>
-    </div>
+
+          <button className={styles.cta}>Iniciar Sesion</button>
+
+          <label className={styles.rememberRow}>
+            <input type="checkbox" />
+            <span>Recordame...</span>
+          </label>
+        </div>
+      </section>
+    </main>
   );
 }
