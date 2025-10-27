@@ -14,9 +14,10 @@ export default function TutoPage() {
         { text: "Cerrar sesión", href: "completar" },
     ];
 
+
     return (
         <body className={styles.body}>
-            <HamburgerMenu items={menuItems} />
+            <HamburgerMenu items={menuItems}/>
             <main>
                 <div className={styles.container}>
                     <div className={styles.card}>

@@ -1,10 +1,11 @@
 "use client"
 
+import { useRouter } from "next/navigation";
 import styles from '../styles/home.module.css'
 import HamburgerMenu from "../components/Hamburger-menu";
 
 export default function Home() {
-
+    const router = useRouter();
     /* falta completar las direcciones href de cada item hamburger menu */
     const menuItems = [
         { text: "Inicio", href: "completar" },
@@ -14,18 +15,27 @@ export default function Home() {
         { text: "Cerrar sesión", href: "completar" },
     ];
 
-    return (
-        <body className={styles.body}>
-            <HamburgerMenu items={menuItems} />
+    const irAJugar = () => {
+        router.push("/home/play");
+    };
 
-            <main>
-                <div className={styles.container}>
-                    <h1 className={styles.title}>Bienvenido a LudoTime!</h1>
-                    <button className={styles.playbtn} /*onClick */>JUGAR</button><br/>
-                    <button className={styles.shopbtn} /*onClick */>TIENDA</button><br/>
-                    <button className={styles.scoresbtn} /*onClick */>PUNTAJES GLOBALES</button>
-                </div>
-            </main>
-        </body>
+    const irATienda = () => {
+        router.push("/home/shop");
+    };
+
+    const irAPuntajes = () => {
+        router.push("/home/scores");
+    };
+
+    return (
+        <main className={styles.body}>
+            <HamburgerMenu items={menuItems} />
+            <div className={styles.container}>
+                <h1 className={styles.title}>Bienvenido a LudoTime!</h1>
+                <button className={styles.playbtn} onClick={irAJugar}>JUGAR</button><br/>
+                <button className={styles.shopbtn} onClick={irATienda}>TIENDA</button><br/>
+                <button className={styles.scoresbtn} onClick={irAPuntajes}>PUNTAJES GLOBALES</button>
+            </div>
+        </main>
     )
 }

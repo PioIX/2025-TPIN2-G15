@@ -49,7 +49,7 @@ export default function LoginPage() {
       <section className={styles.cardWrap}>
         <div className={styles.logoHolder}>
           <Image
-            src="/assets/ludotime.png"
+            src="/assets/mainLogo.png"
             alt="LudoTime"
             fill
             sizes="320px"
