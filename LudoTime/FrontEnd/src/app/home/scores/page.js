@@ -98,12 +98,12 @@ export default function ScoresPage() {
       <HamburgerMenu items={menuItems} />
       <div className={styles.board}>
         <header className={styles.header}>
-          <span>Puesto</span>
-          <span>Jugador</span>
-          <span>Ludo</span>
-          <span>Time</span>
-          <span>Math</span>
-          <span>Trofeos</span>
+          <span className={styles.span1}>Puesto</span>
+          <span className={styles.span2}>Jugador</span>
+          <span className={styles.span3}>Ludo</span>
+          <span className={styles.span4}>Time</span>
+          <span className={styles.span5}>Math</span>
+          <span className={styles.span6}>Trofeos</span>
         </header>
 
         <div className={styles.rows}>
