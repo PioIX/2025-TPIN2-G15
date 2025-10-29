@@ -25,7 +25,7 @@
 
 .cardWrap {
   position: relative;
-  width: min(92vw, 620px);
+  width: 500px;
 }
 
 .logoHolder {
@@ -47,7 +47,7 @@
 .card {
   background: linear-gradient(180deg, #bfc4ff 0%, #b9befe 8%, #b3b9fd 100%);
   border-radius: 22px;
-  padding: 86px 36px 28px; /* espacio arriba para el logo */
+  padding: 45px 36px 28px; /* espacio arriba para el logo */
   box-shadow:
     0 20px 40px rgba(0,0,0,0.45),
     inset 0 1px 0 rgba(255,255,255,0.35);
