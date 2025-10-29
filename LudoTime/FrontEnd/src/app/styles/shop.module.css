@@ -26,6 +26,10 @@
   z-index: -1;
 }
 
+.topBar {
+  padding-right: 230px;
+}
+
 .topTitle {
   font-size: clamp(26px, 3.2vw, 36px);
   letter-spacing: 0.6em;
