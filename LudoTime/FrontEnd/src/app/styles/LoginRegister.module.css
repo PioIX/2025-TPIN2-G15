@@ -13,10 +13,12 @@
 .bg {
   position: fixed;
   inset: 0;
-  background: center / cover no-repeat;
   filter: blur(6px);
   transform: scale(1.05);
   z-index: -2;
+  background-image: url(../../../public/assets/mainBgImagent.png);
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .tint {
@@ -31,7 +33,7 @@
   =========================== */
 .cardWrap {
   position: relative;
-  width: min(92vw, 520px);
+  width: min(92vw, 500px);
 }
 
 .logoHolder {
@@ -57,7 +59,7 @@
   background: rgba(199, 208, 255, 0.22);
   backdrop-filter: blur(2px);
   border-radius: 18px;
-  padding: 82px 26px 22px;
+  padding: 50px 30px 30px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
 }
 

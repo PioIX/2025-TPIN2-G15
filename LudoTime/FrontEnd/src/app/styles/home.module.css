@@ -9,11 +9,13 @@
     background-repeat: no-repeat;
     color: black;
     background-color: #fff;
+    background-position: center;
+    height: 945px;
 }
 
 .container {
-    padding-top: 150px;
     padding-left: 125px;
+    padding-bottom: 60px;
 }
 
 .playbtn, .shopbtn, .scoresbtn {
@@ -22,11 +24,11 @@
     border-color: rgba(113, 27, 124, 0.993);
     border-style: solid;
     border-width: 7.5px;
-    height: 80px;
-    width: 700px;
+    height: 100px;
+    width: 850px;
     text-align: center;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     border-radius: 20px;
     font-size: 20px;
     color: black;
@@ -37,7 +39,9 @@
     padding-top: 200px;
 }
 
-
+.playbtn:hover, .shopbtn:hover, .scoresbtn:hover {
+  background-color: #bc8ecb;
+}
 
 
 
@@ -59,10 +63,6 @@
   align-items: center;
   padding-left: 10px;
 }
-
-
-
-
 
 .toggle {
   position: absolute;
@@ -125,6 +125,8 @@
 
 .sub-menu li a:hover {
   font-weight: bold;
+  text-decoration: underline;
+  color:#bc8ecb;
 }
 
 /* HAMBURGER (coincide con el HTML: --htx con doble guión) */

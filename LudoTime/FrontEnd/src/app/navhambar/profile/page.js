@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "@/app/styles/profile.module.css";
+import HamburgerMenu from "../../components/Hamburger-menu";
 
 const KEY_USER = "lt_user";
 const KEY_REMEMBER_EMAIL = "lt_remember_email";
@@ -12,6 +13,14 @@ export default function ProfilePage() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const menuItems = [
+        { text: "Inicio", href: "../../home" },
+        { text: "Perfil", href: "../profile" },
+        { text: "Ayuda", href: "../help" },
+        { text: "Configuración", href: "../settings" },
+        { text: "Cerrar sesión", href:"../log out" },
+    ];
 
     // Cargar datos del usuario si existe sesión
     useEffect(() => {
@@ -47,7 +56,7 @@ export default function ProfilePage() {
     if (loading) {
         return (
             <main className={styles.screen}>
-                <div className={styles.bg} style={{ backgroundImage: "url('/assets/mainBgImagent.png')" }} />
+                <div className={styles.bg}/>
                 <div className={styles.tint} />
                 <header className={styles.topBar}>
                     <h2 className={styles.topTitle}>Perfil de usuario</h2>
@@ -61,7 +70,8 @@ export default function ProfilePage() {
 
     return (
         <main className={styles.screen}>
-            <div className={styles.bg} style={{ backgroundImage: "url('/assets/mainBgImagent.png')" }} />
+            <HamburgerMenu items={menuItems} />
+            <div className={styles.bg}/>
             <div className={styles.tint} />
 
             <header className={styles.topBar}>
@@ -122,3 +132,4 @@ export default function ProfilePage() {
         </main>
     );
 }
+

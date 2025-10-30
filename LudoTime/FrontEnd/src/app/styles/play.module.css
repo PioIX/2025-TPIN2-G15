@@ -169,6 +169,8 @@
 
 .sub-menu li a:hover {
   font-weight: bold;
+  text-decoration: underline;
+  color:#bc8ecb;
 }
 
 /* HAMBURGER (coincide con el HTML: --htx con doble guión) */

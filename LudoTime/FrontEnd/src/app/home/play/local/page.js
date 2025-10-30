@@ -7,13 +7,12 @@ import HamburgerMenu from "../../../components/Hamburger-menu";
 export default function LocalPage() {
     const router = useRouter();
 
-    /* falta completar las direcciones href de cada item hamburger menu */
     const menuItems = [
-        { text: "Inicio", href: "completar" },
-        { text: "Perfil", href: "completar" },
-        { text: "Ayuda", href: "completar" },
-        { text: "Configuración", href: "completar" },
-        { text: "Cerrar sesión", href: "completar" },
+        { text: "Inicio", href: "../../../home" },
+        { text: "Perfil", href: "../../../navhambar/profile" },
+        { text: "Ayuda", href: "../../../navhambar/help" },
+        { text: "Configuración", href: "../../../navhambar/settings" },
+        { text: "Cerrar sesión", href:"../../../navhambar/log out" },
     ];
 
     /* 

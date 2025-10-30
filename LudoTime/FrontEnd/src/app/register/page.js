@@ -76,7 +76,7 @@ export default function RegisterPage() {
 
   return (
     <main className={styles.screen}>
-      <div className={styles.bg} style={{ backgroundImage: "url('/assets/mainBgImagent.png')" }} />
+      <div className={styles.bg}/>
       <div className={styles.tint} />
 
       <section className={styles.cardWrap}>
