@@ -1,3 +1,7 @@
+/* ==================================================
+   ESTRUCTURA GENERAL Y FONDO
+   ================================================== */
+
 .screen {
   min-height: 100svh;
   width: 100%;
@@ -26,30 +30,49 @@
   z-index: -1;
 }
 
+
+/* ==================================================
+   BARRA SUPERIOR (TIENDA)
+   ================================================== */
+
 .topBar {
-  padding-right: 230px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  pointer-events: none; 
 }
 
 .topTitle {
   font-size: clamp(26px, 3.2vw, 36px);
   letter-spacing: 0.6em;
   color: #e3f7e6;
-  text-align: center;
-  line-height: 56px;
   font-weight: 800;
+  text-align: center;
   margin: 0;
-  position: absolute;
-  z-index: 3000;
+  line-height: 1;
+  user-select: none;
+  pointer-events: auto;
 }
+
+
+/* ==================================================
+   PANEL PRINCIPAL DE ARTÍCULOS
+   ================================================== */
 
 .panel {
   width: min(92vw, 1050px);
-  margin-top: 72px;
-  margin-bottom: 72px; 
+  margin-top: 90px;
+  margin-bottom: 72px;
   background: rgba(0, 0, 0, 0.82);
   border-radius: 28px;
   padding: 24px 28px 28px;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
 }
 
 .sectionTitle {
@@ -60,6 +83,7 @@
   font-size: clamp(28px, 3.2vw, 40px);
   margin: 4px 0 16px;
 }
+
 .underline {
   display: block;
   height: 3px;
@@ -68,6 +92,11 @@
   background: #9ca3af;
   border-radius: 2px;
 }
+
+
+/* ==================================================
+   LAYOUT INTERIOR (CATEGORÍAS + CONTENIDO)
+   ================================================== */
 
 .content {
   display: grid;
@@ -84,6 +113,7 @@
   gap: 18px;
   padding-top: 8px;
 }
+
 .iconSlot {
   position: relative;
   width: 76px;
@@ -91,9 +121,25 @@
   border-radius: 9999px;
   overflow: hidden;
   background: #e9f5ea;
-  box-shadow: 0 8px 0 rgba(0,0,0,0.35);
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.35);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, outline-color .12s ease;
 }
-.iconImg { object-fit: cover; }
+.iconSlot:hover {
+  transform: translateY(-1px);
+}
+.iconSlot:focus-visible {
+  outline: 3px solid #7dd3fc;
+}
+.iconActive {
+  box-shadow: 0 0 0 3px #9ca3af, 0 8px 0 rgba(0,0,0,.35);
+}
+
+.iconImg {
+  object-fit: cover;
+}
 
 .divider {
   width: 2px;
@@ -103,7 +149,7 @@
 .stage {
   position: relative;
   border-radius: 18px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -117,249 +163,62 @@
   line-height: 1.35;
 }
 
+
+/* ==================================================
+   GRILLA DE ITEMS
+   ================================================== */
+
+.itemsGrid {
+  --size: 140px;
+  list-style: none;
+  margin: 0;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, var(--size));
+  gap: 26px 42px;
+  justify-content: start;
+}
+
+.itemCard {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #eef2ff;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+.itemImg {
+  object-fit: cover;
+}
+
+
+/* ==================================================
+   RESPONSIVIDAD
+   ================================================== */
+
+@media (max-width: 980px) {
+  .itemsGrid {
+    grid-template-columns: repeat(3, var(--size));
+    gap: 22px 30px;
+  }
+}
+
 @media (max-width: 720px) {
   .content {
     grid-template-columns: 72px 2px 1fr;
     min-height: 56vh;
   }
-  .iconSlot { width: 64px; height: 64px; }
+
+  .iconSlot {
+    width: 64px;
+    height: 64px;
+  }
+
+  .itemsGrid {
+    --size: 110px;
+    grid-template-columns: repeat(2, var(--size));
+    gap: 18px 22px;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* INICIO DEL HAMBURGER MENU */
-
-
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 70px; /* ajustá según el tamaño del botón */
-  background-color: rgba(0, 0, 0, 0.9); /* igual que la barra lateral */
-  z-index: 999; /* por encima del contenido */
-  display: flex;
-  align-items: center;
-  padding-left: 10px;
-}
-
-
-
-
-
-.toggle {
-  position: absolute;
-  left: -9999px;
-}
-
-/* Asegurate de que sub-menu quede arriba del botón cuando se abra */
-.sub-menu {
-  padding: 0 0 0 2%;
-  left: -300px;
-  top: 10%;
-  transition: all 0.3s ease;
-  height: 30%;
-  width: 300px;
-  position: fixed;
-  margin: 0;
-  background-color: rgba(0, 0, 0, 0.9);
-  border-radius: 0;
-  z-index: 1000; /* sube el z-index */
-  overflow: hidden;
-  color: #fff;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Abrir menú cuando el checkbox está checkeado */
-.toggle:checked ~ .sub-menu {
-  left: 0;
-}
-
-/* LISTA SIN ESTILOS (usando module) */
-.list-unstyled {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.sub-menu li {
-  display: block;
-  height: auto;
-  margin-left: 0;
-  padding: 10px 0;
-  transition: all 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);
-}
-
-.sub-menu li:first-child {
-  margin-top: 100px;
-}
-
-.sub-menu li a {
-  color: #fff;
-  font-size: 16px;
-  width: 100%;
-  display: block;
-  text-transform: uppercase;
-  line-height: 30px;
-  text-decoration: none;
-}
-
-.sub-menu li a:hover {
-  font-weight: bold;
-}
-
-/* HAMBURGER (coincide con el HTML: --htx con doble guión) */
-.c-hamburger {
-  display: block;
-  position: relative;
-  overflow: hidden;
-  margin: 10px;
-  padding: 0;
-  width: 36px;
-  height: 36px;
-  z-index: 1100; /* por encima del nav cerrado */
-  font-size: 0;
-  text-indent: -9999px;
-  appearance: none;
-  background: transparent;
-  box-shadow: none;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.c-hamburger:focus {
-  outline: none;
-}
-
-.c-hamburger span {
-  display: block;
-  position: absolute;
-  top: 16px;      /* ajusté un poco para centrar */
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: white;
-}
-
-.c-hamburger span:before,
-.c-hamburger span:after {
-  position: absolute;
-  display: block;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: white;
-  content: "";
-}
-
-.c-hamburger span:before { top: -10px; }
-.c-hamburger span:after  { bottom: -10px; }
-
-/* Variante --htx (doble guión) */
-.c-hamburger--htx span {
-  transition: background 0s 0.3s;
-}
-.c-hamburger--htx span:before,
-.c-hamburger--htx span:after {
-  transition-duration: 0.3s, 0.3s;
-  transition-delay: 0.3s, 0s;
-}
-.c-hamburger--htx span:before { transition-property: top, transform; }
-.c-hamburger--htx span:after  { transition-property: bottom, transform; }
-
-/* Estado activo → cuando el checkbox está chequeado
-   (input + label + nav → usamos el hermano adyacente `+` para el label) */
-.toggle:checked + .c-hamburger--htx span {
-  background: none;
-}
-.toggle:checked + .c-hamburger--htx span:before {
-  top: 0;
-  transform: rotate(45deg);
-}
-.toggle:checked + .c-hamburger--htx span:after {
-  bottom: 0;
-  transform: rotate(-45deg);
-}
-
-/* Posicioná el botón visible SIEMPRE */
-.c-hamburger {
-  position: fixed;      /* antes era relative */
-  top: 14px;
-  left: 14px;
-  width: 36px;
-  height: 36px;
-  z-index: 1100;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-/* Hacé visible las barritas (antes eran blancas y tu fondo es blanco) */
-.c-hamburger span,
-.c-hamburger span::before,
-.c-hamburger span::after {
-  background: #ffffff;  /* morado oscuro (o negro) */
-}
-
-/* ====== MENU LATERAL ====== */
-.sub-menu {
-  position: fixed;
-  top: 0;            /* baja un poco para no tapar el botón */
-  left: -320px;         /* fuera de pantalla */
-  width: 300px;
-  height: 40%;
-  background: rgba(0,0,0,.9);
-  color: #fff;
-  transition: left .3s ease;
-  z-index: 1000;
-  overflow: hidden;
-  justify-content: center;
-  align-items: center;
-}
-
-/* AHORA SÍ: cuando el componente agrega la clase, se abre */
-.sub-menu.oppenned {
-  left: 0;
-}
-
-/* Lista sin estilos (Module) */
-.list-unstyled { margin: 0; padding: 0; list-style: none; }
-.sub-menu li    { padding: 10px 0; }
-.sub-menu a     { color: #fff; text-decoration: none; text-transform: uppercase; }
-
-/* ====== ANIMACIÓN DEL ÍCONO A "X" USANDO .is-active ====== */
-.is-active span { background: none; }
-.is-active span::before {
-  top: 0;
-  transform: rotate(45deg);
-}
-.is-active span::after {
-  bottom: 0;
-  transform: rotate(-45deg);
-}
-
-/* Mantengo tus transiciones de la variante --htx */
-.c-hamburger--htx span { transition: background 0s .3s; }
-.c-hamburger--htx span::before,
-.c-hamburger--htx span::after {
-  transition-duration: .3s, .3s;
-  transition-delay: .3s, 0s;
-}
-.c-hamburger--htx span::before { transition-property: top, transform; }
-.c-hamburger--htx span::after  { transition-property: bottom, transform; }
-
-/* FIN DEL HAMBURGER MENU */
