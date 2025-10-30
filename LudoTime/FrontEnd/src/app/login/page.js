@@ -8,6 +8,7 @@ import styles from "../styles/LoginRegister.module.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+// claves de storage (mantenemos consistencia con Register)
 const KEY_USER = "lt_user";
 const KEY_REMEMBER_EMAIL = "lt_remember_email";
 const KEY_REMEMBER_FLAG = "lt_remember_flag";
@@ -21,21 +22,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
 
+  // estado inicial del remember y correo guardado
   useEffect(() => {
     try {
-      const rememberFlag =
-        typeof window !== "undefined" &&
-        window.localStorage.getItem(KEY_REMEMBER_FLAG) === "1";
-      setRemember(rememberFlag);
-
-      if (rememberFlag) {
-        const rememberedEmail =
-          window.localStorage.getItem(KEY_REMEMBER_EMAIL) || "";
-        if (rememberedEmail) setCorreo(rememberedEmail);
+      const flag = window.localStorage.getItem(KEY_REMEMBER_FLAG) === "1";
+      setRemember(flag);
+      if (flag) {
+        const saved = window.localStorage.getItem(KEY_REMEMBER_EMAIL) || "";
+        if (saved) setCorreo(saved);
       }
     } catch {}
   }, []);
 
+  // si cambia correo y remember está activo, persistimos
   useEffect(() => {
     try {
       if (remember) {
@@ -56,24 +55,22 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
-
       if (!res.ok || !data.ok) {
         setMsg(data.msg || "Error de autenticación");
         return;
       }
 
-      window.localStorage.removeItem(KEY_USER);
-      window.sessionStorage.removeItem(KEY_USER);
+      // limpiar restos y guardar sesión según remember
+      try {
+        window.localStorage.removeItem(KEY_USER);
+        window.sessionStorage.removeItem(KEY_USER);
+        const storage = remember ? window.localStorage : window.sessionStorage;
+        storage.setItem(KEY_USER, JSON.stringify(data.user));
+        window.localStorage.setItem(KEY_REMEMBER_FLAG, remember ? "1" : "0");
+        if (remember) window.localStorage.setItem(KEY_REMEMBER_EMAIL, correo || "");
+        else window.localStorage.removeItem(KEY_REMEMBER_EMAIL);
+      } catch {}
 
-      const storage = remember ? window.localStorage : window.sessionStorage;
-      storage.setItem(KEY_USER, JSON.stringify(data.user));
-
-      window.localStorage.setItem(KEY_REMEMBER_FLAG, remember ? "1" : "0");
-      if (remember)
-        window.localStorage.setItem(KEY_REMEMBER_EMAIL, correo || "");
-      else window.localStorage.removeItem(KEY_REMEMBER_EMAIL);
-
-      setMsg("Login exitoso");
       router.push("/home");
     } catch {
       setMsg("Error de red. Intenta de nuevo.");
@@ -84,7 +81,7 @@ export default function LoginPage() {
 
   return (
     <main className={styles.screen}>
-      <div className={styles.bg} />
+      <div className={styles.bg} style={{ backgroundImage: "url('/assets/mainBgImagent.png')" }} />
       <div className={styles.tint} />
 
       <section className={styles.cardWrap}>
@@ -113,13 +110,13 @@ export default function LoginPage() {
           <input
             className={styles.input}
             type="password"
-            placeholder="Ingrese un contraseña..."
+            placeholder="Ingrese una contraseña..."
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
           />
 
           <button className={styles.cta} onClick={handleLogin} disabled={loading}>
-            {loading ? "Ingresando..." : "Iniciar Sesion"}
+            {loading ? "Ingresando..." : "Iniciar Sesión"}
           </button>
 
           <label className={styles.rememberRow}>
@@ -139,31 +136,12 @@ export default function LoginPage() {
             <span>Recordame...</span>
           </label>
 
-          {/* NUEVO TEXTO DE ENLACE */}
-          <p
-            style={{
-              textAlign: "center",
-              marginTop: "15px",
-              fontSize: "15px",
-              color: "#1b0431",
-            }}
-          >
+          <p className={styles.swapText}>
             ¿No tienes una cuenta?{" "}
-            <Link
-              href="/register"
-              style={{ textDecoration: "underline", fontWeight: "600" }}
-            >
-              Regístrate
-            </Link>
+            <Link href="/register" className={styles.swapLink}>Regístrate</Link>
           </p>
 
-          {msg && (
-            <p
-              style={{ textAlign: "center", marginTop: 10, color: "#1b0431" }}
-            >
-              {msg}
-            </p>
-          )}
+          {msg && <p className={styles.msg}>{msg}</p>}
         </div>
       </section>
     </main>

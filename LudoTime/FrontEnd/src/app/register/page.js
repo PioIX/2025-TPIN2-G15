@@ -20,15 +20,11 @@ export default function RegisterPage() {
 
   useEffect(() => {
     try {
-      const rememberFlag =
-        typeof window !== "undefined" &&
-        window.localStorage.getItem(KEY_REMEMBER_FLAG) === "1";
-      setRemember(rememberFlag);
-
-      if (rememberFlag) {
-        const rememberedEmail =
-          window.localStorage.getItem(KEY_REMEMBER_EMAIL) || "";
-        if (rememberedEmail) setCorreo(rememberedEmail);
+      const flag = window.localStorage.getItem(KEY_REMEMBER_FLAG) === "1";
+      setRemember(flag);
+      if (flag) {
+        const saved = window.localStorage.getItem(KEY_REMEMBER_EMAIL) || "";
+        if (saved) setCorreo(saved);
       }
     } catch {}
   }, []);
@@ -53,26 +49,24 @@ export default function RegisterPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
+      if (!res.ok || !data.ok) {
         setMsg(data.msg || "Error al registrar");
         return;
       }
 
-      window.localStorage.setItem(KEY_REMEMBER_FLAG, remember ? "1" : "0");
-      if (remember) {
-        window.localStorage.setItem(KEY_REMEMBER_EMAIL, correo || "");
-      } else {
-        window.localStorage.removeItem(KEY_REMEMBER_EMAIL);
-      }
+      try {
+        window.localStorage.setItem(KEY_REMEMBER_FLAG, remember ? "1" : "0");
+        if (remember) window.localStorage.setItem(KEY_REMEMBER_EMAIL, correo || "");
+        else window.localStorage.removeItem(KEY_REMEMBER_EMAIL);
+      } catch {}
 
-      setMsg("✅ Usuario creado con éxito");
+      setMsg("Usuario creado con éxito");
       setNombre("");
       setCorreo("");
       setContrasena("");
 
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1500);
+      // pequeño redirect automático
+      setTimeout(() => { window.location.href = "/login"; }, 1200);
     } catch {
       setMsg("Error de red");
     } finally {
@@ -82,7 +76,7 @@ export default function RegisterPage() {
 
   return (
     <main className={styles.screen}>
-      <div className={styles.bg} />
+      <div className={styles.bg} style={{ backgroundImage: "url('/assets/mainBgImagent.png')" }} />
       <div className={styles.tint} />
 
       <section className={styles.cardWrap}>
@@ -119,16 +113,12 @@ export default function RegisterPage() {
           <input
             className={styles.input}
             type="password"
-            placeholder="Ingrese un contraseña..."
+            placeholder="Ingrese una contraseña..."
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
           />
 
-          <button
-            className={styles.cta}
-            onClick={handleRegister}
-            disabled={loading}
-          >
+          <button className={styles.cta} onClick={handleRegister} disabled={loading}>
             {loading ? "Creando..." : "Siguiente"}
           </button>
 
@@ -149,35 +139,12 @@ export default function RegisterPage() {
             <span>Recordame...</span>
           </label>
 
-          {/* NUEVO TEXTO DE ENLACE */}
-          <p
-            style={{
-              textAlign: "center",
-              marginTop: "15px",
-              fontSize: "15px",
-              color: "#1b0431",
-            }}
-          >
+          <p className={styles.swapText}>
             ¿Ya tienes una cuenta?{" "}
-            <Link
-              href="/login"
-              style={{ textDecoration: "underline", fontWeight: "600" }}
-            >
-              Inicia sesión
-            </Link>
+            <Link href="/login" className={styles.swapLink}>Inicia sesión</Link>
           </p>
 
-          {msg && (
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                color: "#1b0431",
-              }}
-            >
-              {msg}
-            </p>
-          )}
+          {msg && <p className={styles.msg}>{msg}</p>}
         </div>
       </section>
     </main>

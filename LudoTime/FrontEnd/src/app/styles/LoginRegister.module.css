@@ -1,3 +1,6 @@
+/*===========================
+  Fondo y contenedor general
+  =========================== */
 .screen {
   min-height: 100svh;
   width: 100%;
@@ -10,121 +13,161 @@
 .bg {
   position: fixed;
   inset: 0;
-  background: url("/assets/mainBgImagent.png") center / cover no-repeat;
-  filter: blur(0.5px);
-  transform: scale(1);
+  background: center / cover no-repeat;
+  filter: blur(6px);
+  transform: scale(1.05);
   z-index: -2;
 }
 
 .tint {
   position: fixed;
   inset: 0;
-  background: rgba(30, 1, 60, 0.82);
+  background: rgba(21, 21, 21, 0.023);
   z-index: -1;
 }
 
+/*===========================
+  Logo sobre la tarjeta
+  =========================== */
 .cardWrap {
   position: relative;
-  width: 500px;
+  width: min(92vw, 520px);
 }
 
 .logoHolder {
   position: absolute;
+  top: -70px;
   left: 50%;
   transform: translateX(-50%);
-  top: -42px;
-  width: 600px;
-  height: 90px;
+  width: 400px;
+  height: 135px;
   pointer-events: none;
   z-index: 2;
-  filter: drop-shadow(0 8px 14px rgba(0,0,0,0.45));
 }
 
 .logoImg {
   object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.482));
 }
 
+/*===========================
+  Tarjeta
+  =========================== */
 .card {
-  background: linear-gradient(180deg, #bfc4ff 0%, #b9befe 8%, #b3b9fd 100%);
-  border-radius: 22px;
-  padding: 45px 36px 28px; /* espacio arriba para el logo */
-  box-shadow:
-    0 20px 40px rgba(0,0,0,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.35);
+  background: rgba(199, 208, 255, 0.22);
+  backdrop-filter: blur(2px);
+  border-radius: 18px;
+  padding: 82px 26px 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
 }
 
 .title {
   text-align: center;
-  font-size: clamp(36px, 4.4vw, 54px);
+  color: #e5e7eb;
+  letter-spacing: .35em;
   font-weight: 800;
-  letter-spacing: 0.18em;
-  color: #1b0431;
-  margin: 6px 0 18px;
-  text-shadow: 0 3px 0 rgba(255,255,255,0.35);
+  font-size: 40px;
+  margin: 0 0 18px;
 }
 
+/*===========================
+  Inputs y botón
+  =========================== */
 .input {
   width: 100%;
-  height: 54px;
-  border-radius: 9999px;
-  border: 2px solid rgba(0,0,0,0.65);
+  height: 53px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, .65);
+  background: rgba(255, 255, 255, .15);
+  color: #111827;
+  padding: 0 14px;
+  font-size: 15px;
   outline: none;
-  margin: 12px 0;
-  padding: 0 22px;
-  font-size: 16px;
-  color: #1b0431;
-  background: #e9eaff;
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,0.8),
-    0 6px 0 rgba(0,0,0,0.18);
+  margin-bottom: 12px;
 }
 
 .input::placeholder {
-  color: #7a7ba8;
+  color: #cbd5e1;
 }
 
 .cta {
-  display: block;
   width: 100%;
-  height: 58px;
-  border: none;
-  border-radius: 9999px;
-  font-size: 24px;
-  letter-spacing: 0.12em;
+  height: 46px;
+  border: 0;
+  border-radius: 16px;
+  background: #27014b;
+  color: #ffffff;
   font-weight: 800;
-  color: #fff;
-  background: #1a042c;
-  box-shadow: 0 10px 0 #0d001a, 0 18px 36px rgba(0,0,0,0.45);
-  margin: 18px 0 10px;
+  letter-spacing: .12em;
+  font-size: 16px;
   cursor: pointer;
-  transition: transform .06s ease, box-shadow .06s ease, filter .2s ease;
+  transition: transform .08s ease, box-shadow .08s ease, opacity .2s;
+  margin-top: 4px;
 }
 
-.cta:hover { filter: brightness(1.08); }
-.cta:active {
-  transform: translateY(3px);
-  box-shadow: 0 7px 0 #0d001a, 0 14px 28px rgba(0,0,0,0.45);
+.cta:hover {
+  transform: translateY(-2px);
 }
 
+.cta:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+/*===========================
+  Remember row y links
+  =========================== */
 .rememberRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 30px;
-  user-select: none;
-  color: #1b0431;
-  font-size: 18px;
-  margin-top: 30px;
   justify-content: center;
+  /* centrado */
+  gap: 10px;
+  color: #1b0431;
+  font-size: 15px;
+  margin-top: 16px;
+  /* separación del botón */
+  user-select: none;
 }
 
-.rememberRow input {
-  width: 18px;
-  height: 18px;
+.swapText {
+  text-align: center;
+  margin-top: 10px;
+  color: #1b0431;
+  font-size: 14px;
 }
 
-@media (max-width: 480px) {
-  .logoHolder { width: 260px; height: 78px; top: -36px; }
-  .card { padding: 72px 20px 24px; }
-  .cta { font-size: 20px; height: 54px; }
+.swapLink {
+  text-decoration: underline;
+  font-weight: 700;
+  color: #1b0431;
+}
+
+/*===========================
+  Mensajes
+  =========================== */
+.msg {
+  text-align: center;
+  margin-top: 10px;
+  color: #1b0431;
+  font-weight: 600;
+}
+
+/*===========================
+  Responsive
+  =========================== */
+@media (max-width: 420px) {
+  .logoHolder {
+    width: 240px;
+    top: -60px;
+  }
+
+  .card {
+    padding-top: 74px;
+  }
+
+  .title {
+    font-size: 24px;
+    letter-spacing: .28em;
+  }
 }
