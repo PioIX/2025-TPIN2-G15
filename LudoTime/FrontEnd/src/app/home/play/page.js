@@ -51,7 +51,7 @@ export default function PlayPage() {
                     <button className={`${styles.tutobtn} ${styles.card}`} onClick={irATutorial}>
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
                         <div className={styles.content}>
-                            <span className={styles.title}>TUTO</span>
+                            <span className={styles.title}>TUTORIAL</span>
                             <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
                         </div>
                     </button>
