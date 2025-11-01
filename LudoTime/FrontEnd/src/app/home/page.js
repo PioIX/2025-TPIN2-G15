@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import styles from '../styles/home.module.css'
 import HamburgerMenu from "../components/Hamburger-menu";
+import Image from "next/image";
 
 export default function Home() {
     const router = useRouter();
@@ -35,6 +36,20 @@ export default function Home() {
                 <button className={styles.playbtn} onClick={irAJugar}>JUGAR</button><br/>
                 <button className={styles.shopbtn} onClick={irATienda}>TIENDA</button><br/>
                 <button className={styles.scoresbtn} onClick={irAPuntajes}>PUNTAJES GLOBALES</button>
+            </div>
+            <div className={styles.imgdiv}>
+                <Image src="/assets/classicimage.png"
+                alt="Tablero de ludo"
+                width={550}
+                height={550}
+                className={styles["spinning-img"]} //me estoy hartando de poner todo en ingles
+                />
+                <Image src="/assets/mainLogo.png"
+                alt="Logo de LudoTime"
+                width={725}
+                height={150}
+                className={styles.logo}
+                />
             </div>
         </main>
     )

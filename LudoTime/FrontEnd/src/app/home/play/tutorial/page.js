@@ -1,6 +1,7 @@
 "use client"
 
 import styles from "../../../styles/tutorial.module.css"
+import Image from "next/image";
 import HamburgerMenu from "../../../components/Hamburger-menu";
 
 export default function TutoPage() {
@@ -24,7 +25,12 @@ export default function TutoPage() {
                         <p>Para jugar al Ludo, cada jugador comienza con 4 fichas en su zona segura. El objetivo es llevar todas tus fichas a la meta antes que los demás. En cada turno, lanzas el dado y avanzas una ficha según el número obtenido. Si caes en una casilla ocupada por otro jugador, su ficha regresa a la zona segura. El primer jugador en llegar con todas sus fichas a la meta gana.</p>
                     </div>
                     <div className={styles.imgdiv}>
-                        {/*<Image src=""/>*/}
+                        <Image src="/assets/classicimage.png"
+                        alt="Descripción de la imagen"
+                        width={530}
+                        height={530}
+                        className={styles["spinning-img"]} //me estoy hartando de poner todo en ingles
+                        />
                     </div>
                 </div>
             </main>

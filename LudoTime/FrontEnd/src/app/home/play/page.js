@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import styles from "../../styles/play.module.css"
 import HamburgerMenu from "../../components/Hamburger-menu";
+import Image from "next/image";
 
 export default function PlayPage() {
     const router = useRouter();

@@ -6,7 +6,7 @@
   background-image: url("../../../public/assets/bgImageLightBlue.png");
   background-size: cover;
   background-repeat: no-repeat;
-  padding: 80px;
+  padding: 100px;
   gap: 40px;
 }
 
@@ -23,8 +23,9 @@
   background-color: #96cde9;
   text-align: center;
   flex-direction: column;
-  padding: 80px;
+  padding: 100px;
   gap: 30px;
+  margin-right: 50px;
 }
 
 .card p {
@@ -38,19 +39,29 @@
 
 .imgdiv {
   position: right;
-  height: 700px;
+  height: 750px;
   width: 50%;
   border-radius: 20px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.566);
   text-align: center;
   flex-direction: column;
 }
 
+.spinning-img {
+  animation: rotar 7.5s linear infinite; /* velocidad y tipo de rotacion */
+}
 
+@keyframes rotar {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 
 

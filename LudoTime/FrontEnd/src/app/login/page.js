@@ -48,7 +48,7 @@ export default function LoginPage() {
       setLoading(true);
       setMsg(null);
 
-      const res = await fetch(`${API_URL}/api/login`, {
+      const res = await fetch(`${"http://localhost:4000"}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, contrasena }),

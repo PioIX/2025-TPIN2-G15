@@ -43,6 +43,49 @@
   background-color: #bc8ecb;
 }
 
+.imgdiv {
+  position: right;
+  height: 940px;
+  width: 50%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+  
+}
+
+.logo {
+  position: absolute;
+  bottom: 20%;
+  z-index: 10;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%   { opacity: .75; transform: scale(1); }
+  50%  { opacity: 1;   transform: scale(1.05); }
+  100% { opacity: .75; transform: scale(1); }
+}
+
+.spinning-img {
+  animation: rotar 7.5s linear infinite; /* velocidad y tipo de rotacion */
+  border: 5px solid rgba(0, 0, 0, 0.3);
+  left: 75%;
+}
+
+
+@keyframes rotar {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
 
 
 
