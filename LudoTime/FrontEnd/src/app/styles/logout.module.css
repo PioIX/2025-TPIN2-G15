@@ -1,0 +1,48 @@
+/* styles/Logout.module.css */
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #2f2f2f;
+  color: white;
+  font-family: 'Arial', sans-serif;
+  
+}
+
+.bg {
+    position: fixed;
+    inset: 0;
+    filter: blur(6px);
+    transform: scale(1.05);
+    z-index: -2;
+    background-image: url(../../../public/assets/mainBgImagent.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.content {
+  text-align: center;
+  background-color: #3d3d3d;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ffcc00;
+}
+
+.message {
+  margin-top: 20px;
+  font-size: 1.2rem;
+}
+
+.redirect {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #bbb;
+}
