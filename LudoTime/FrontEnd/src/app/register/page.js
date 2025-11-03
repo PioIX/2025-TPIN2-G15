@@ -65,7 +65,6 @@ export default function RegisterPage() {
       setCorreo("");
       setContrasena("");
 
-      // pequeño redirect automático
       setTimeout(() => { window.location.href = "/login"; }, 1200);
     } catch {
       setMsg("Error de red");

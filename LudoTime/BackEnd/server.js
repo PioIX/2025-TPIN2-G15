@@ -153,10 +153,94 @@ app.get("/api/_debug/usuarioslt", async (_req, res) => {
 
 
 // ==================================================
-// Inicialización del server de loan
+// Inicialización del server
 // ==================================================
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
     console.log(`Servidor API escuchando en el puerto ${PORT} [env=${process.env.NODE_ENV}]`);
+});
+
+// ========================================
+//        ENDPOINTS PERFIL DE USUARIO
+// ========================================
+
+// Cambiar nombre de usuario
+app.patch("/api/profile/name", async (req, res) => {
+    try {
+        const { id, nombre } = req.body;
+        if (!id || !nombre)
+            return res.status(400).json({ ok: false, msg: "Faltan campos" });
+
+        await pool.query("UPDATE UsuariosLT SET nombre = ? WHERE idUsuarios = ?", [
+            nombre,
+            id,
+        ]);
+        res.json({ ok: true, msg: "Nombre actualizado" });
+    } catch (e) {
+        console.error("PATCH /profile/name", e);
+        res.status(500).json({ ok: false, msg: "Error del servidor" });
+    }
+});
+
+// Cambiar correo
+app.patch("/api/profile/email", async (req, res) => {
+    try {
+        const { id, correo } = req.body;
+        if (!id || !correo)
+            return res.status(400).json({ ok: false, msg: "Faltan campos" });
+
+        const [rows] = await pool.query(
+            "SELECT idUsuarios FROM UsuariosLT WHERE correo = ? AND idUsuarios <> ? LIMIT 1",
+            [correo, id]
+        );
+        if (rows.length)
+            return res
+                .status(409)
+                .json({ ok: false, msg: "Ese correo ya está en uso" });
+
+        await pool.query("UPDATE UsuariosLT SET correo = ? WHERE idUsuarios = ?", [
+            correo,
+            id,
+        ]);
+        res.json({ ok: true, msg: "Correo actualizado" });
+    } catch (e) {
+        console.error("PATCH /profile/email", e);
+        res.status(500).json({ ok: false, msg: "Error del servidor" });
+    }
+});
+
+// Cambiar contraseña
+app.patch("/api/profile/password", async (req, res) => {
+    try {
+        const { id, actual, nueva } = req.body;
+        if (!id || !actual || !nueva)
+            return res.status(400).json({ ok: false, msg: "Faltan campos" });
+
+        const [rows] = await pool.query(
+            "SELECT contrasena FROM UsuariosLT WHERE idUsuarios = ? LIMIT 1",
+            [id]
+        );
+        if (!rows.length)
+            return res
+                .status(404)
+                .json({ ok: false, msg: "Usuario no encontrado" });
+
+        const ok = await bcrypt.compare(actual, rows[0].contrasena);
+        if (!ok)
+            return res
+                .status(401)
+                .json({ ok: false, msg: "Contraseña actual incorrecta" });
+
+        const hash = await bcrypt.hash(nueva, 10);
+        await pool.query("UPDATE UsuariosLT SET contrasena = ? WHERE idUsuarios = ?", [
+            hash,
+            id,
+        ]);
+
+        res.json({ ok: true, msg: "Contraseña actualizada" });
+    } catch (e) {
+        console.error("PATCH /profile/password", e);
+        res.status(500).json({ ok: false, msg: "Error del servidor" });
+    }
 });
