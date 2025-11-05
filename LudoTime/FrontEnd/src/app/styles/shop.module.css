@@ -1,94 +1,197 @@
-.body {
-    margin: 0;
-    background-image: url('../../../public/assets/homeB.png');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    background-repeat: no-repeat;
-    color: black;
-    background-color: #fff;
-    background-position: center;
-    height: 945px;
-}
+/* ==================================================
+   ESTRUCTURA GENERAL Y FONDO
+   ================================================== */
 
-.container {
-    padding-left: 125px;
-    padding-bottom: 60px;
-}
-
-.playbtn, .shopbtn, .scoresbtn {
-    padding: 20px;
-    background-color: white;
-    border-color: rgba(113, 27, 124, 0.993);
-    border-style: solid;
-    border-width: 7.5px;
-    height: 100px;
-    width: 850px;
-    text-align: center;
-    align-items: center;
-    margin-bottom: 20px;
-    border-radius: 20px;
-    font-size: 20px;
-    color: black;
-    font-weight: bold;
-}
-.title {
-    margin-bottom: 20px;
-    padding-top: 200px;
-}
-
-.playbtn:hover, .shopbtn:hover, .scoresbtn:hover {
-  background-color: #bc8ecb;
-}
-
-.imgdiv {
-  position: right;
-  height: 940px;
-  width: 50%;
+.screen {
+  min-height: 100svh;
+  width: 100%;
+  position: relative;
+  display: grid;
+  place-items: center;
   overflow: hidden;
+  background-image: url(../../../public/assets/bgImageGreen.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background: center / cover no-repeat;
+  filter: blur(6px);
+  transform: scale(1.05);
+  z-index: -2;
+}
+
+.tint {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: -1;
+}
+
+
+/* ==================================================
+   BARRA SUPERIOR (TIENDA)
+   ================================================== */
+
+.topBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2000;
+  pointer-events: none; 
+}
+
+.topTitle {
+  font-size: clamp(26px, 3.2vw, 36px);
+  letter-spacing: 0.6em;
+  color: #e3f7e6;
+  font-weight: 800;
   text-align: center;
-  flex-direction: column;
-  
-}
-
-.logo {
-  position: absolute;
-  bottom: 20%;
-  z-index: 10;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%   { opacity: .75; transform: scale(1); }
-  50%  { opacity: 1;   transform: scale(1.05); }
-  100% { opacity: .75; transform: scale(1); }
-}
-
-.spinning-img {
-  animation: rotar 7.5s linear infinite; /* velocidad y tipo de rotacion */
-  border: 5px solid rgba(0, 0, 0, 0.3);
-  left: 75%;
+  margin: 0;
+  line-height: 1;
+  user-select: none;
+  pointer-events: auto;
 }
 
 
-@keyframes rotar {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* ==================================================
+   PANEL PRINCIPAL DE ARTÍCULOS
+   ================================================== */
+
+.panel {
+  width: min(92vw, 1050px);
+  margin-top: 90px;
+  margin-bottom: 72px;
+  background: rgba(0, 0, 0, 0.82);
+  border-radius: 28px;
+  padding: 24px 28px 28px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+
+.sectionTitle {
+  text-align: center;
+  color: #e5e7eb;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  font-size: clamp(28px, 3.2vw, 40px);
+  margin: 4px 0 16px;
+}
+
+.underline {
+  display: block;
+  height: 3px;
+  width: 52%;
+  margin: 10px auto 0;
+  background: #9ca3af;
+  border-radius: 2px;
 }
 
 
+/* ==================================================
+   LAYOUT INTERIOR (CATEGORÍAS + CONTENIDO)
+   ================================================== */
+
+.content {
+  display: grid;
+  grid-template-columns: 96px 2px 1fr;
+  gap: 22px;
+  align-items: stretch;
+  min-height: min(58vh, 460px);
+}
+
+.leftRail {
+  display: grid;
+  grid-auto-rows: 76px;
+  align-content: start;
+  gap: 18px;
+  padding-top: 8px;
+}
+
+.iconSlot {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #e9f5ea;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.35);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, outline-color .12s ease;
+}
+.iconSlot:hover {
+  transform: translateY(-1px);
+}
+.iconSlot:focus-visible {
+  outline: 3px solid #7dd3fc;
+}
+.iconActive {
+  box-shadow: 0 0 0 3px #9ca3af, 0 8px 0 rgba(0,0,0,.35);
+}
+
+.iconImg {
+  object-fit: cover;
+}
+
+.divider {
+  width: 2px;
+  background: rgba(209, 213, 219, 0.7);
+}
+
+.stage {
+  position: relative;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.helper {
+  color: #cbd5e1;
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(18px, 2.2vw, 28px);
+  line-height: 1.35;
+}
 
 
+/* ==================================================
+   GRILLA DE ITEMS
+   ================================================== */
 
+.itemsGrid {
+  --size: 140px;
+  list-style: none;
+  margin: 0;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, var(--size));
+  gap: 26px 42px;
+  justify-content: start;
+}
+
+.itemCard {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #eef2ff;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+.itemImg {
+  object-fit: cover;
+}
 
 
 /* INICIO DEL HAMBURGER MENU */
@@ -314,3 +417,33 @@
 .c-hamburger--htx span::after  { transition-property: bottom, transform; }
 
 /* FIN DEL HAMBURGER MENU */
+
+
+/* ==================================================
+   RESPONSIVIDAD
+   ================================================== */
+
+@media (max-width: 980px) {
+  .itemsGrid {
+    grid-template-columns: repeat(3, var(--size));
+    gap: 22px 30px;
+  }
+}
+
+@media (max-width: 720px) {
+  .content {
+    grid-template-columns: 72px 2px 1fr;
+    min-height: 56vh;
+  }
+
+  .iconSlot {
+    width: 64px;
+    height: 64px;
+  }
+
+  .itemsGrid {
+    --size: 110px;
+    grid-template-columns: repeat(2, var(--size));
+    gap: 18px 22px;
+  }
+}

@@ -1,98 +1,204 @@
-.body {
-    margin: 0;
-    background-image: url('../../../public/assets/homeB.png');
+/* ===========================
+   Fondo y layout base
+   =========================== */
+.screen {
+    min-height: 100svh;
+    width: 100%;
+    position: relative;
+    overflow: auto;
+    /* permite scroll en la página */
+}
+
+.bg {
+    position: fixed;
+    inset: 0;
+    filter: blur(6px);
+    transform: scale(1.05);
+    z-index: -2;
+    background-image: url(../../../public/assets/mainBgImagent.png);
     background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
     background-repeat: no-repeat;
-    color: black;
-    background-color: #fff;
-    background-position: center;
-    height: 945px;
 }
 
-.container {
-    padding-left: 125px;
-    padding-bottom: 60px;
+.tint {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    z-index: -1;
 }
 
-.playbtn, .shopbtn, .scoresbtn {
-    padding: 20px;
-    background-color: white;
-    border-color: rgba(113, 27, 124, 0.993);
-    border-style: solid;
-    border-width: 7.5px;
-    height: 100px;
-    width: 850px;
-    text-align: center;
+/* ===========================
+   Barra superior
+   =========================== */
+
+.topBar {
+    position: sticky;
+    top: 0;
+    height: 64px;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    border-radius: 20px;
-    font-size: 20px;
-    color: black;
-    font-weight: bold;
-}
-.title {
-    margin-bottom: 20px;
-    padding-top: 200px;
+    z-index: 1100;                    /* MOD: sube por encima del fondo */
+    background: rgba(0, 0, 0, 0.85);  /* MOD: para que el título se lea */
+    backdrop-filter: blur(2px);       /* MOD */
+    pointer-events: none;             /* MOD: no bloquea el click del botón */
 }
 
-.playbtn:hover, .shopbtn:hover, .scoresbtn:hover {
-  background-color: #bc8ecb;
+.topTitle {
+    margin: 0;
+    color: #e5e7eb;
+    font-weight: 800;
+    letter-spacing: .35em;
+    text-transform: none;
+    font-size: clamp(20px, 2.8vw, 34px);
+    user-select: none;
+    pointer-events: auto;             /* MOD: el texto sigue interactuable */
 }
 
-.imgdiv {
-  position: right;
-  height: 940px;
-  width: 50%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  flex-direction: column;
-  
+/* ===========================
+   Contenedor de contenido
+   =========================== */
+.wrap {
+    max-width: 980px;
+    margin: 22px auto 80px;
+    padding: 0 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
 }
 
-.logo {
-  position: absolute;
-  bottom: 20%;
-  z-index: 10;
-  animation: pulse 2s infinite;
+/* Logo superior */
+.logoHolder {
+    position: relative;
+    width: 450px;
+    height: 90px;
+    margin: 8px auto 8px;
 }
 
-@keyframes pulse {
-  0%   { opacity: .75; transform: scale(1); }
-  50%  { opacity: 1;   transform: scale(1.05); }
-  100% { opacity: .75; transform: scale(1); }
+.logoImg {
+    object-fit: contain;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .6));
 }
 
-.spinning-img {
-  animation: rotar 7.5s linear infinite; /* velocidad y tipo de rotacion */
-  border: 5px solid rgba(0, 0, 0, 0.3);
-  left: 75%;
+/* ===========================
+   Secciones
+   =========================== */
+.section {
+    background: rgba(0, 0, 0, .35);
+    border-radius: 18px;
+    padding: 22px 18px 26px;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, .35);
 }
 
-
-@keyframes rotar {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.sectionHeader {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
 }
 
+.hrLeft,
+.hrRight {
+    height: 4px;
+    border-radius: 4px;
+    background: #f2b61d;
+    /* dorado */
+    opacity: .85;
+}
 
+.sectionTitle {
+    color: #f2b61d;
+    font-weight: 900;
+    font-size: clamp(22px, 2.6vw, 34px);
+    letter-spacing: .18em;
+    margin: 0;
+}
 
+/* Línea principal (nombre/correo/contraseña) */
+.lineBig {
+    text-align: center;
+    color: #eef;
+    font-weight: 800;
+    letter-spacing: .22em;
+    font-size: clamp(18px, 2.4vw, 28px);
+    margin: 12px 0 10px;
+}
 
+/* Botón acción amarillo */
+.action {
+    display: block;
+    margin: 0 auto 12px;
+    height: 42px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 9999px;
+    background: #f2b61d;
+    /* amarillo */
+    color: #361148;
+    /* violeta oscuro */
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: lowercase;
+    cursor: pointer;
+    box-shadow: 0 8px 0 rgba(0, 0, 0, .35);
+    transition: transform .08s ease, box-shadow .08s ease, opacity .2s;
+}
 
+.action:hover {
+    transform: translateY(-1px);
+}
 
+.action:active {
+    transform: translateY(0);
+}
+
+.action:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+/* ===========================
+   Bloque de Cerrar sesión
+   =========================== */
+.logoutBlock {
+    background: rgba(0, 0, 0, .35);
+    border-radius: 18px;
+    padding: 26px 18px 36px;
+    text-align: center;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, .35);
+}
+
+.logoutTitle {
+    color: #f2b61d;
+    font-weight: 900;
+    letter-spacing: .35em;
+    font-size: clamp(20px, 2.6vw, 30px);
+    margin: 0 0 16px;
+}
+
+/* Botón circular rojo grande */
+.logoutBtn {
+    width: 110px;
+    height: 110px;
+    border-radius: 9999px;
+    margin: 4px auto 0;
+    display: inline-block;
+    border: 0;
+    background: radial-gradient(#ff5a5a, #c71e1e);
+    box-shadow:
+        inset 0 0 0 10px rgba(0, 0, 0, .15),
+        0 12px 0 rgba(0, 0, 0, .35);
+    cursor: pointer;
+    transition: transform .08s ease, filter .15s ease;
+}
+
+.logoutBtn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+}
 
 /* INICIO DEL HAMBURGER MENU */
-
 
 .header {
   position: fixed;
@@ -181,7 +287,7 @@
   padding: 0;
   width: 36px;
   height: 36px;
-  z-index: 1100; /* por encima del nav cerrado */
+  z-index: 1200;              /* MOD: sobre todo */
   font-size: 0;
   text-indent: -9999px;
   appearance: none;
@@ -253,7 +359,7 @@
   left: 14px;
   width: 36px;
   height: 36px;
-  z-index: 1100;
+  z-index: 1200;        /* MOD: consistente */
   background: transparent;
   border: none;
   cursor: pointer;
@@ -269,14 +375,14 @@
 /* ====== MENU LATERAL ====== */
 .sub-menu {
   position: fixed;
-  top: 0;            /* baja un poco para no tapar el botón */
+  top: 64px;            /* MOD: se despliega debajo del título */
   left: -320px;         /* fuera de pantalla */
   width: 300px;
   height: 40%;
   background: rgba(0,0,0,.9);
   color: #fff;
   transition: left .3s ease;
-  z-index: 1000;
+  z-index: 1150;        /* MOD: entre topBar (1100) y botón (1200) */
   overflow: hidden;
   justify-content: center;
   align-items: center;
@@ -314,3 +420,21 @@
 .c-hamburger--htx span::after  { transition-property: bottom, transform; }
 
 /* FIN DEL HAMBURGER MENU */
+
+/* ===========================
+   Responsive ajustes
+   =========================== */
+@media (max-width: 720px) {
+    .wrap {
+        gap: 28px;
+    }
+
+    .section {
+        padding: 18px 14px 22px;
+    }
+
+    .logoHolder {
+        width: 240px;
+        height: 76px;
+    }
+}
