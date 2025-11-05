@@ -37,7 +37,7 @@ export default function PlayPage() {
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
                         <div className={styles.content}>
                             <span className={styles.title}>LOCAL</span>
-                            <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
+                            <span className={styles.desc}>Para jugar entre amigos desde una misma red!</span>
                         </div>
                     </button>
 
@@ -45,15 +45,7 @@ export default function PlayPage() {
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
                         <div className={styles.content}>
                             <span className={styles.title}>ONLINE</span>
-                            <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
-                        </div>
-                    </button>
-
-                    <button className={`${styles.tutobtn} ${styles.card}`} onClick={irATutorial}>
-                        <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
-                        <div className={styles.content}>
-                            <span className={styles.title}>TUTORIAL</span>
-                            <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
+                            <span className={styles.desc}>Para jugar en linea entre diferenes usuarios del mundo!</span>
                         </div>
                     </button>
                 </div>
