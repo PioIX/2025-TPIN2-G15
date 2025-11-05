@@ -38,7 +38,7 @@ export default function LocalPage() {
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
                         <div className={styles.content}>
                             <span className={styles.title}>CLASSIC</span>
-                            <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
+                            <span className={styles.desc}>El Ludo de toda la vida. Para los más clasicos y puristas!</span>
                         </div>
                     </button>
 
@@ -46,7 +46,7 @@ export default function LocalPage() {
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
                         <div className={styles.content}>
                             <span className={styles.title}>MATH</span>
-                            <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
+                            <span className={styles.desc}>Dedicado a matematicos puros. Aquí gana más la mente que la suerte!</span>
                         </div>
                     </button>
 
@@ -54,7 +54,7 @@ export default function LocalPage() {
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
                         <div className={styles.content}>
                             <span className={styles.title}>TIME</span>
-                            <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
+                            <span className={styles.desc}>El modo predeterminado de LUDOTIME!</span>
                         </div>
                     </button>
                 </div>
