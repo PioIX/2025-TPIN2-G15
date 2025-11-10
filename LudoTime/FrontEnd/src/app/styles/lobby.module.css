@@ -1,0 +1,125 @@
+.screen {
+    min-height: 100svh;
+    width: 100%;
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.bg {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: url("/assets/mainBgImagent.png");
+    background-size: cover;
+    background-position: center;
+    filter: blur(6px);
+    transform: scale(1.05);
+}
+
+.tint {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: rgba(58, 0, 84, .55);
+}
+
+.card {
+    width: min(92vw, 640px);
+    border-radius: 24px;
+    padding: 26px 28px 32px;
+    background: linear-gradient(180deg, rgba(173, 183, 255, .35), rgba(173, 183, 255, .28));
+    backdrop-filter: blur(10px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+}
+
+.logoHolder {
+    position: relative;
+    height: 82px;
+    width: 420px;
+    margin: 0 auto 6px;
+}
+
+.logoImg {
+    object-fit: contain;
+}
+
+.mode {
+    margin: 4px 0 12px;
+    text-align: center;
+    color: #e6e6ff;
+    letter-spacing: .18em;
+    font-size: clamp(20px, 3vw, 28px);
+    text-shadow: 0 3px 10px rgba(0, 0, 0, .35);
+}
+
+.counter {
+    width: 100%;
+    background: #d7d9ff;
+    color: #6c6f93;
+    border-radius: 20px;
+    padding: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    letter-spacing: .25em;
+    font-size: clamp(18px, 2.6vw, 28px);
+    margin-bottom: 16px;
+}
+
+.list {
+    background: rgba(255, 255, 255, .9);
+    border-radius: 16px;
+    padding: 18px;
+    min-height: 160px;
+    display: grid;
+    gap: 10px;
+}
+
+.slot {
+    background: rgba(0, 0, 0, .06);
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: center;
+    font-weight: 800;
+    color: #6a6a83;
+    letter-spacing: .12em;
+}
+
+.slot span {
+    font-size: clamp(14px, 2.2vw, 20px);
+}
+
+.empty {
+    opacity: .45;
+}
+
+.status {
+    text-align: center;
+    margin: 12px 0 14px;
+    color: #d8d8ff;
+    letter-spacing: .1em;
+    font-weight: 700;
+}
+
+.cta {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-weight: 900;
+    font-size: clamp(16px, 2.4vw, 22px);
+    letter-spacing: .18em;
+    background: #0d781f;
+    color: #fff;
+    box-shadow: 0 10px 0 rgba(0, 0, 0, .35);
+    cursor: pointer;
+    transition: transform .06s ease, filter .2s ease;
+}
+
+.cta:active {
+    transform: translateY(2px);
+    filter: brightness(.95);
+}
