@@ -1,0 +1,242 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #e0e7ff, #f3e8ff);
+  padding: 2rem;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #312e81;
+}
+
+.turnIndicator {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  background-color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.turnText {
+  font-size: 1.875rem;
+  font-weight: bold;
+}
+
+.turnTextGreen {
+  color: #15803d;
+}
+
+.turnTextYellow {
+  color: #ca8a04;
+}
+
+.turnTextBlue {
+  color: #1d4ed8;
+}
+
+.turnTextRed {
+  color: #dc2626;
+}
+
+.boardContainer {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 0;
+  background-color: #1f2937;
+  padding: 0.25rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cell {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cellGreen {
+  background-color: #22c55e;
+}
+
+.cellYellow {
+  background-color: #facc15;
+}
+
+.cellBlue {
+  background-color: #60a5fa;
+}
+
+.cellRed {
+  background-color: #ef4444;
+}
+
+.cellWhite {
+  background-color: white;
+}
+
+.cellGreenPath {
+  background-color: #86efac;
+}
+
+.cellYellowPath {
+  background-color: #fde047;
+}
+
+.cellBluePath {
+  background-color: #93c5fd;
+}
+
+.cellRedPath {
+  background-color: #fca5a5;
+}
+
+.star {
+  color: #9ca3af;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.arrow {
+  font-size: 1.25rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.arrowGreen {
+  color: #15803d;
+}
+
+.arrowYellow {
+  color: #ca8a04;
+}
+
+.arrowBlue {
+  color: #1d4ed8;
+}
+
+.arrowRed {
+  color: #dc2626;
+}
+
+.piece {
+  border-radius: 50%;
+  border: 2px solid white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pieceGreen {
+  background-color: #15803d;
+}
+
+.pieceYellow {
+  background-color: #ca8a04;
+}
+
+.pieceBlue {
+  background-color: #1d4ed8;
+}
+
+.pieceRed {
+  background-color: #dc2626;
+}
+
+.pieceSmall {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.pieceMedium {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.pieceLarge {
+  width: 1.75rem;
+  height: 1.75rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px white, 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.pieceLarge:hover {
+  transform: scale(1.2);
+}
+
+.diceContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.diceButton {
+  padding: 1.25rem 2.5rem;
+  border-radius: 0.75rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  border: none;
+}
+
+.diceButtonActive {
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  cursor: pointer;
+}
+
+.diceButtonActive:hover {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  transform: scale(1.05);
+}
+
+.diceButtonDisabled {
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.rulesContainer {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  text-align: center;
+  max-width: 32rem;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rulesTitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.rulesText {
+  margin: 0.25rem 0;
+}
