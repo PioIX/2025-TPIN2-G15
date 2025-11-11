@@ -41,7 +41,6 @@ export default function Board({
                     (r >= 9 && c >= 9) ? "blue" :
                         (r <= 5 && c <= 5) ? "green" : null;
 
-        // ¿es centro?
         const isCenter = r === 7 && c === 7;
 
         // ¿es pasillo?
@@ -56,7 +55,6 @@ export default function Board({
         // ¿es pista común?
         const trackIdx = TRACK_MAP.findIndex(({ r: rr, c: cc }) => rr === r && cc === c);
 
-        // clases según lo anterior
         const classes = [css.cell];
         if (homeColor) classes.push(css[`home_${homeColor}`]);
         if (isCenter) classes.push(css.center);
@@ -88,7 +86,7 @@ export default function Board({
                 {showSafe && SAFE_CELLS.has(k) && (
                     <div className={css.safeIcon}>
                         <Image
-                            src="/assets/board/Yipeee.png"   // <- tu archivo
+                            src="/assets/game/board/Yipeee.png"   // <- tu archivo
                             alt="safe"
                             fill
                             sizes="36px"
@@ -110,6 +108,8 @@ export default function Board({
             </div>
         );
     };
+
+    console.log("Estoy siendo recibido")
 
     return (
         <div className={css.board}>
