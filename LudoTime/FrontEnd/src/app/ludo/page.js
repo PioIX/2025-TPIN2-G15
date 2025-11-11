@@ -192,6 +192,7 @@ export default function LudoPage() {
         if (x > 8 && y < 6) return styles.cellYellow;
         if (x > 8 && y > 8) return styles.cellBlue;
         if (x < 6 && y > 8) return styles.cellRed;
+        
 
         if (x >= 6 && x <= 8 && y >= 6 && y <= 8) {
             if (x === 6 && y === 6) return styles.cellGreen;
@@ -211,6 +212,7 @@ export default function LudoPage() {
 
         return styles.cellWhite;
     };
+
 
     // Renderizar el tablero
     const renderBoard = () => {
@@ -352,10 +354,10 @@ export default function LudoPage() {
                     });
                 });
 
-                if (x === 0 && y === 6) content = <span className={`${styles.arrow} ${styles.arrowGreen}`}>→</span>;
-                if (x === 8 && y === 0) content = <span className={`${styles.arrow} ${styles.arrowYellow}`}>↓</span>;
-                if (x === 14 && y === 8) content = <span className={`${styles.arrow} ${styles.arrowBlue}`}>←</span>;
-                if (x === 6 && y === 14) content = <span className={`${styles.arrow} ${styles.arrowRed}`}>↑</span>;
+                if (x === 0 && y === 7) content = <span className={`${styles.arrow} ${styles.arrowGreen}`}>→</span>;
+                if (x === 7 && y === 0) content = <span className={`${styles.arrow} ${styles.arrowYellow}`}>↓</span>;
+                if (x === 14 && y === 7) content = <span className={`${styles.arrow} ${styles.arrowBlue}`}>←</span>;
+                if (x === 7 && y === 14) content = <span className={`${styles.arrow} ${styles.arrowRed}`}>↑</span>;
 
                 cells.push(
                     <div key={`${x}-${y}`} className={cellClass}>
