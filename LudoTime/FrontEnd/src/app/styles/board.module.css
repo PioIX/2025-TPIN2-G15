@@ -1,0 +1,191 @@
+/* ===== board.module.css ===== */
+/* grid 15×15 centrado, sin imagen de fondo. Pintamos todo con CSS. */
+
+.board {
+    display: grid;
+    grid-template-rows: repeat(15, 36px);
+    grid-template-columns: repeat(15, 36px);
+    gap: 2px;
+    /* líneas blancas del tablero */
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
+}
+
+.cell {
+    position: relative;
+    background: #f7f7fb;
+    /* celda “blanca” */
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* bloques de hogar (los cuatro grandes) */
+.home_red {
+    background: #fbe2e2;
+}
+
+.home_blue {
+    background: #e2edfb;
+}
+
+.home_yellow {
+    background: #fbf3e2;
+}
+
+.home_green {
+    background: #e3f7e6;
+}
+
+/* carriles hacia meta */
+.lane_red {
+    background: #ffd9d9;
+}
+
+.lane_blue {
+    background: #d9e6ff;
+}
+
+.lane_yellow {
+    background: #fff0cc;
+}
+
+.lane_green {
+    background: #d7f2db;
+}
+
+/* anillo común */
+.track {
+    background: #ffffff;
+}
+
+/* centro (meta) */
+.center {
+    background: conic-gradient(from 45deg,
+            #ff6b6b 0 25%,
+            #50b4ff 0 50%,
+            #ffd34d 0 75%,
+            #39c36b 0 100%);
+}
+
+/* “salida” (solo marca visual leve) */
+.start {
+    outline: 3px solid #7c3aed;
+    outline-offset: -3px;
+}
+
+/* seguros con estrellita encima */
+.safeIcon {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+.safeIcon :global(img) {
+    object-fit: contain;
+    opacity: .85;
+}
+
+.safeImg {
+    object-fit: contain;
+    width: 70% !important;
+    /* estrella no ocupa toda la celda */
+    height: 70% !important;
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, .35));
+    /* un pelín de contraste */
+    opacity: .9;
+}
+
+/* apilado simple de fichas (chips) */
+.pile {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    gap: 4px;
+    grid-auto-flow: column;
+}
+
+.chip_red,
+.chip_blue,
+.chip_yellow,
+.chip_green {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+.chip_red {
+    background: #e11d48;
+}
+
+.chip_blue {
+    background: #2563eb;
+}
+
+.chip_yellow {
+    background: #f59e0b;
+}
+
+.chip_green {
+    background: #16a34a;
+}
+
+/* contadores alrededor del centro (una “bolita” por color con el número) */
+.centerCounters {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+
+.centerCounters span {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    display: grid;
+    place-items: center;
+    font: 700 13px/1 Inter, system-ui, sans-serif;
+    color: #111;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+}
+
+.dot_red {
+    top: 58%;
+    left: 48%;
+    border: 3px solid #e11d48;
+    transform: translate(-150%, 70%);
+}
+
+.dot_blue {
+    top: 48%;
+    left: 58%;
+    border: 3px solid #2563eb;
+    transform: translate(70%, -150%);
+}
+
+.dot_yellow {
+    top: 38%;
+    left: 48%;
+    border: 3px solid #f59e0b;
+    transform: translate(-150%, -210%);
+}
+
+.dot_green {
+    top: 48%;
+    left: 38%;
+    border: 3px solid #16a34a;
+    transform: translate(-210%, -150%);
+}
+
+.cell.safe {
+    outline: 2px dashed rgba(76, 29, 149, .65);
+    /* morado */
+    outline-offset: -2px;
+}
