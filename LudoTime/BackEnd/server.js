@@ -3,8 +3,16 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import bcrypt from "bcryptjs";
 import { pool } from "./database/connectionMySQL.js";
+import { Server } from "socket.io";
+import { createServer } from "node:http";
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server);
+
+io.on('connection', () => {
+    console.log('a user has connected!')
+})
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -157,7 +165,7 @@ app.get("/api/_debug/usuarioslt", async (_req, res) => {
 // ==================================================
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Servidor API escuchando en el puerto ${PORT} [env=${process.env.NODE_ENV}]`);
 });
 
@@ -243,4 +251,8 @@ app.patch("/api/profile/password", async (req, res) => {
         console.error("PATCH /profile/password", e);
         res.status(500).json({ ok: false, msg: "Error del servidor" });
     }
+});
+
+app.get("/", (req, res) => {
+    res.sendFile(process.cwd() + "../FrontEnd/src/app/home/play/online/classic/page.js");
 });
