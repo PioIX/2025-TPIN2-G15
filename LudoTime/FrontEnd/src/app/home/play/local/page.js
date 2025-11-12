@@ -22,7 +22,7 @@ export default function LocalPage() {
                 <div className={styles.container}>
                     <button
                         className={`${styles.card} ${styles.classicbtn}`}
-                        onClick={() => router.push("/home/play/local/classic")}
+                        onClick={() => router.push("/home/play/local/classic/config")}
                     >
                         <div className={styles.overlay}></div>
                         <div className={styles.content}>
@@ -32,19 +32,8 @@ export default function LocalPage() {
                     </button>
 
                     <button
-                        className={`${styles.card} ${styles.mathbtn}`}
-                        onClick={() => router.push("/home/play/local/math")}
-                    >
-                        <div className={styles.overlay}></div>
-                        <div className={styles.content}>
-                            <span className={styles.title}>MATH</span>
-                            <span className={styles.desc}>Dedicado a matemáticos puros. ¡Acá gana más la mente que la suerte!</span>
-                        </div>
-                    </button>
-
-                    <button
                         className={`${styles.card} ${styles.timebtn}`}
-                        onClick={() => router.push("/home/play/local/time")}
+                        onClick={() => router.push("/home/play/local/time/config")}
                     >
                         <div className={styles.overlay}></div>
                         <div className={styles.content}>

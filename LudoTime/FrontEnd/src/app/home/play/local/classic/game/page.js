@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dices } from 'lucide-react';
-import styles from '../styles/ludo.module.css';
+import styles from '@/app/styles/ludo.module.css';
 
 export default function LudoPage() {
     // Estados iniciales

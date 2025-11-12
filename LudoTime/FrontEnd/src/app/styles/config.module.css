@@ -1,0 +1,52 @@
+/* config.module.css */
+
+/* Fondo de pantalla */
+.container {
+  background-image: url('/assets/bgImageWhite.png');
+  background-size: cover;
+  min-height: 100vh;  /* Asegura que ocupe todo el alto de la página */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: rgb(33, 33, 33);
+  padding: 20px;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.optionButton {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.optionButton:hover {
+  background-color: #45a049;
+}
+
+/* Estilos para el input numérico */
+.inputNumber, .inputCheckbox {
+  margin-bottom: 15px;
+}
+
+.inputNumber {
+  width: 60px;
+  padding: 5px;
+}
+
+.inputCheckbox {
+  margin-top: 10px;
+}

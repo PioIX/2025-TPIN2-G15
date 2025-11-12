@@ -5,7 +5,7 @@ import styles from "../../../../styles/lobby.module.css";
 import HamburgerMenu from "../../../../components/Hamburger-menu";
 
 export default function ClassicLobby() {
-    const modeTitle = "Math ➗";
+    const modeTitle = "Clásico";
 
     // placeholders visuales
     const maxPlayers = 4;
