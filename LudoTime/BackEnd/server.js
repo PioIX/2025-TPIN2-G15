@@ -8,135 +8,6 @@ import { createServer } from "node:http";
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: ["https://localhost:3000", "https://localhost:3001"],
-        methods: ["GET", "POST"],
-        credentials: true
-    }
-});
-
-// ========================================
-//        CONFIGURACIÓN DE SOCKET.IO
-// ========================================
-
-// Objeto para almacenar usuarios conectados
-const connectedUsers = new Map();
-
-io.on('connection', (socket) => {
-    console.log('Usuario conectado:', socket.id);
-
-    // Evento: Usuario se une a una sala
-    socket.on('join-game', (data) => {
-        const { userId, userName, roomId } = data;
-        
-        // Guardar información del usuario
-        connectedUsers.set(socket.id, { userId, userName, roomId });
-        
-        // Unirse a la sala
-        socket.join(roomId);
-        
-        console.log(`${userName} se unió a la sala: ${roomId}`);
-        
-        // Notificar a otros usuarios en la sala
-        socket.to(roomId).emit('user-joined', {
-            userId,
-            userName,
-            socketId: socket.id
-        });
-        
-        // Enviar lista de usuarios en la sala
-        const usersInRoom = Array.from(connectedUsers.entries())
-            .filter(([_, user]) => user.roomId === roomId)
-            .map(([socketId, user]) => ({ socketId, ...user }));
-        
-        io.to(roomId).emit('room-users', usersInRoom);
-    });
-
-    // Evento: Movimiento del juego
-    socket.on('game-move', (data) => {
-        const { roomId, move, gameState } = data;
-        
-        // Reenviar el movimiento a todos en la sala excepto al emisor
-        socket.to(roomId).emit('opponent-move', {
-            move,
-            gameState,
-            playerId: socket.id
-        });
-    });
-
-    // Evento: Chat en la sala
-    socket.on('chat-message', (data) => {
-        const { roomId, message } = data;
-        const user = connectedUsers.get(socket.id);
-        
-        if (user) {
-            io.to(roomId).emit('chat-message', {
-                userName: user.userName,
-                message,
-                timestamp: new Date().toISOString()
-            });
-        }
-    });
-
-    // Evento: Solicitud de emparejamiento
-    socket.on('find-match', (data) => {
-        const { userId, userName, gameMode } = data;
-        
-        // Aquí implementarías tu lógica de matchmaking
-        console.log(`${userName} busca partida en modo: ${gameMode}`);
-        
-        // Ejemplo básico: notificar que se está buscando
-        socket.emit('searching-match', { gameMode });
-    });
-
-    // Evento: Cancelar búsqueda
-    socket.on('cancel-search', () => {
-        const user = connectedUsers.get(socket.id);
-        if (user) {
-            console.log(`${user.userName} canceló la búsqueda`);
-            socket.emit('search-cancelled');
-        }
-    });
-
-    // Evento: Rendirse
-    socket.on('surrender', (data) => {
-        const { roomId } = data;
-        const user = connectedUsers.get(socket.id);
-        
-        if (user) {
-            socket.to(roomId).emit('opponent-surrendered', {
-                userName: user.userName
-            });
-        }
-    });
-
-    // Evento: Desconexión
-    socket.on('disconnect', () => {
-        const user = connectedUsers.get(socket.id);
-        
-        if (user) {
-            console.log(`Usuario desconectado: ${user.userName}`);
-            
-            // Notificar a la sala
-            if (user.roomId) {
-                socket.to(user.roomId).emit('user-left', {
-                    userId: user.userId,
-                    userName: user.userName,
-                    socketId: socket.id
-                });
-            }
-            
-            // Eliminar del mapa
-            connectedUsers.delete(socket.id);
-        }
-    });
-
-    // Evento de error
-    socket.on('error', (error) => {
-        console.error('Socket error:', error);
-    });
-});
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -287,7 +158,7 @@ app.get("/api/_debug/usuarioslt", async (_req, res) => {
 // ==================================================
 // Inicialización del server
 // ==================================================
-const PORT = 4001;
+const PORT = process.env.PORT ?? 4000;
 
 server.listen(PORT, () => {
     console.log(`Servidor API escuchando en el puerto ${PORT} [env=${process.env.NODE_ENV}]`);
@@ -377,8 +248,132 @@ app.patch("/api/profile/password", async (req, res) => {
     }
 });
 
-app.get("/api/home/play/online/classic", (req, res) => {
-    const filePath = path.join(__dirname, '../FrontEnd/src/app/play/online/classic/page.js');
-    console.log(filePath)
-    res.sendFile(filePath);
+const io = new Server(server, {
+    cors: {
+        origin: ["https://localhost:3000", "https://localhost:3001"],
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+});
+
+// ========================================
+//        CONFIGURACIÓN DE SOCKET.IO
+// ========================================
+
+// Objeto para almacenar usuarios conectados
+const connectedUsers = new Map();
+
+io.on('connection', (socket) => {
+    console.log('Usuario conectado:', socket.id);
+
+    // Evento: Usuario se une a una sala
+    socket.on('join-game', (data) => {
+        const { userId, userName, roomId } = data;
+        
+        // Guardar información del usuario
+        connectedUsers.set(socket.id, { userId, userName, roomId });
+        
+        // Unirse a la sala
+        socket.join(roomId);
+        
+        console.log(`${userName} se unió a la sala: ${roomId}`);
+        
+        // Notificar a otros usuarios en la sala
+        socket.to(roomId).emit('user-joined', {
+            userId,
+            userName,
+            socketId: socket.id
+        });
+        
+        // Enviar lista de usuarios en la sala
+        const usersInRoom = Array.from(connectedUsers.entries())
+            .filter(([_, user]) => user.roomId === roomId)
+            .map(([socketId, user]) => ({ socketId, ...user }));
+        
+        io.to(roomId).emit('room-users', usersInRoom);
+    });
+
+    // Evento: Movimiento del juego
+    socket.on('game-move', (data) => {
+        const { roomId, move, gameState } = data;
+        
+        // Reenviar el movimiento a todos en la sala excepto al emisor
+        socket.to(roomId).emit('opponent-move', {
+            move,
+            gameState,
+            playerId: socket.id
+        });
+    });
+
+    // Evento: Chat en la sala
+    socket.on('chat-message', (data) => {
+        const { roomId, message } = data;
+        const user = connectedUsers.get(socket.id);
+        
+        if (user) {
+            io.to(roomId).emit('chat-message', {
+                userName: user.userName,
+                message,
+                timestamp: new Date().toISOString()
+            });
+        }
+    });
+
+    // Evento: Solicitud de emparejamiento
+    socket.on('find-match', (data) => {
+        const { userId, userName, gameMode } = data;
+        
+        // Aquí implementarías tu lógica de matchmaking
+        console.log(`${userName} busca partida en modo: ${gameMode}`);
+        
+        // Ejemplo básico: notificar que se está buscando
+        socket.emit('searching-match', { gameMode });
+    });
+
+    // Evento: Cancelar búsqueda
+    socket.on('cancel-search', () => {
+        const user = connectedUsers.get(socket.id);
+        if (user) {
+            console.log(`${user.userName} canceló la búsqueda`);
+            socket.emit('search-cancelled');
+        }
+    });
+
+    // Evento: Rendirse
+    socket.on('surrender', (data) => {
+        const { roomId } = data;
+        const user = connectedUsers.get(socket.id);
+        
+        if (user) {
+            socket.to(roomId).emit('opponent-surrendered', {
+                userName: user.userName
+            });
+        }
+    });
+
+    // Evento: Desconexión
+    socket.on('disconnect', () => {
+        const user = connectedUsers.get(socket.id);
+        
+        if (user) {
+            console.log(`Usuario desconectado: ${user.userName}`);
+            
+            // Notificar a la sala
+            if (user.roomId) {
+                socket.to(user.roomId).emit('user-left', {
+                    userId: user.userId,
+                    userName: user.userName,
+                    socketId: socket.id
+                });
+            }
+            
+            // Eliminar del mapa
+            connectedUsers.delete(socket.id);
+        }
+    });
+
+    // Evento de error
+    socket.on('error', (error) => {
+        console.error('Socket error:', error);
+    });
 });
