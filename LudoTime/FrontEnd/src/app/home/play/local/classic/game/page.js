@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { Dices } from 'lucide-react';
 import styles from '@/app/styles/ludo.module.css';
@@ -24,7 +23,9 @@ export default function LudoPage() {
             3: [-1, -1, -1, -1]
         },
         selectedPiece: null,
-        consecutiveSixes: 0
+        consecutiveSixes: 0,
+        animatingPieces: {}, // Para controlar animaciones
+        capturedPieces: {} // Para animaciones de captura
     });
 
     // Configuración del tablero
@@ -51,7 +52,7 @@ export default function LudoPage() {
     };
 
     const startPositions = { 0: 0, 1: 13, 2: 26, 3: 39 };
-    const safeSpots = [0, 8, 13, 21, 26, 34, 39, 47];
+    const safeSpots = [8, 21, 34, 47];
 
     // Función para tirar el dado
     const rollDice = () => {
@@ -101,63 +102,93 @@ export default function LudoPage() {
         return positions.some((pos, idx) => canMovePiece(playerId, idx));
     };
 
-    // Mover una pieza
-    const movePiece = (pieceIndex) => {
+    // Mover una pieza con animación paso a paso
+    const movePiece = async (pieceIndex) => {
         const playerId = gameState.currentPlayer;
         if (!canMovePiece(playerId, pieceIndex)) return;
 
         const currentPos = gameState.piecePositions[playerId][pieceIndex];
         const dice = gameState.diceValue;
+        
+        // Deshabilitar clicks durante la animación
+        setGameState(prev => ({ ...prev, canRoll: false }));
+
         let newPos;
 
         if (currentPos === -1) {
+            // Salir de la base
             newPos = startPositions[playerId];
+            await animateMovement(playerId, pieceIndex, currentPos, newPos, 1);
         } else if (currentPos >= 52) {
+            // Ya está en el camino final
             newPos = currentPos + dice;
+            if (newPos > 57) {
+                alert(`¡${players[playerId].name} ha completado una ficha!`);
+                newPos = 58;
+            }
+            await animateMovement(playerId, pieceIndex, currentPos, newPos, dice);
         } else {
-            newPos = (currentPos + dice) % 52;
-
+            // Está en el camino principal
             const startPos = startPositions[playerId];
-            const passedStart =
-                (currentPos < startPos && currentPos + dice >= startPos) ||
-                (currentPos >= startPos && currentPos + dice >= startPos + 52);
-
-            if (passedStart && currentPos + dice >= startPos) {
-                const overflow = (currentPos + dice) - (startPos + 51);
-                if (overflow > 0) {
-                    newPos = 52 + overflow - 1;
+            let tempPos = currentPos + dice;
+            
+            // Verificar si debe entrar al camino final
+            let shouldEnterHome = false;
+            let stepsIntoHome = 0;
+            
+            for (let step = 1; step <= dice; step++) {
+                let checkPos = (currentPos + step) % 52;
+                
+                if (currentPos >= startPos && checkPos < currentPos) {
+                    let actualStep = currentPos + step;
+                    if (actualStep >= startPos + 52) {
+                        shouldEnterHome = true;
+                        stepsIntoHome = actualStep - (startPos + 51);
+                        break;
+                    }
                 }
             }
+            
+            if (shouldEnterHome && stepsIntoHome > 0) {
+                newPos = 52 + stepsIntoHome - 1;
+                if (newPos > 57) {
+                    alert(`¡${players[playerId].name} ha completado una ficha!`);
+                    newPos = 58;
+                }
+            } else {
+                newPos = tempPos % 52;
+            }
+
+            await animateMovement(playerId, pieceIndex, currentPos, newPos, dice);
         }
 
-        if (newPos >= 58) {
-            alert(`¡${players[playerId].name} ha completado una ficha!`);
-            newPos = 58;
-        }
-
+        // Actualizar posición final
         const newPositions = { ...gameState.piecePositions };
         newPositions[playerId] = [...newPositions[playerId]];
         newPositions[playerId][pieceIndex] = newPos;
 
+        // Comer fichas enemigas
         let capturedPiece = false;
-        if (newPos < 52 && !safeSpots.includes(newPos)) {
-            Object.keys(newPositions).forEach(pid => {
+        if (newPos < 52 && !safeSpots.includes(newPos) && ![0, 13, 26, 39].includes(newPos)) {
+            for (let pid of Object.keys(newPositions)) {
                 if (parseInt(pid) !== playerId) {
-                    newPositions[pid] = newPositions[pid].map(pos => {
-                        if (pos === newPos) {
+                    for (let i = 0; i < newPositions[pid].length; i++) {
+                        if (newPositions[pid][i] === newPos) {
                             capturedPiece = true;
-                            return -1;
+                            // Animar captura
+                            await animateCapture(parseInt(pid), i);
+                            newPositions[pid][i] = -1;
                         }
-                        return pos;
-                    });
+                    }
                 }
-            });
+            }
         }
 
         setGameState(prev => ({
             ...prev,
             piecePositions: newPositions,
-            selectedPiece: null
+            selectedPiece: null,
+            animatingPieces: {}
         }));
 
         if (dice === 6 || capturedPiece) {
@@ -166,6 +197,73 @@ export default function LudoPage() {
             setTimeout(() => nextTurn(), 500);
         }
     };
+
+    // Función para animar movimiento paso a paso
+    const animateMovement = async (playerId, pieceIndex, startPos, endPos, steps) => {
+        const delay = 200; // milisegundos entre cada paso
+
+        if (startPos === -1) {
+            // Salir de la base
+            setGameState(prev => {
+                const newPositions = { ...prev.piecePositions };
+                newPositions[playerId] = [...newPositions[playerId]];
+                newPositions[playerId][pieceIndex] = endPos;
+                return {
+                    ...prev,
+                    piecePositions: newPositions,
+                    animatingPieces: { [`${playerId}-${pieceIndex}`]: true }
+                };
+            });
+            await sleep(delay);
+            return;
+        }
+
+        // Animar paso a paso
+        for (let step = 1; step <= steps; step++) {
+            let currentStepPos;
+            
+            if (startPos >= 52) {
+                // En camino final
+                currentStepPos = startPos + step;
+            } else {
+                currentStepPos = (startPos + step) % 52;
+                
+                // Manejar entrada al camino final
+                if (endPos >= 52 && currentStepPos === 0) {
+                    currentStepPos = 52 + (step - (52 - startPos));
+                }
+            }
+
+            setGameState(prev => {
+                const newPositions = { ...prev.piecePositions };
+                newPositions[playerId] = [...newPositions[playerId]];
+                newPositions[playerId][pieceIndex] = currentStepPos;
+                return {
+                    ...prev,
+                    piecePositions: newPositions,
+                    animatingPieces: { [`${playerId}-${pieceIndex}`]: true }
+                };
+            });
+
+            await sleep(delay);
+        }
+    };
+
+    // Función para animar captura
+    const animateCapture = async (playerId, pieceIndex) => {
+        setGameState(prev => ({
+            ...prev,
+            capturedPieces: { [`${playerId}-${pieceIndex}`]: true }
+        }));
+        await sleep(500);
+        setGameState(prev => ({
+            ...prev,
+            capturedPieces: {}
+        }));
+    };
+
+    // Función helper para delays
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     // Pasar al siguiente turno
     const nextTurn = () => {
@@ -193,7 +291,6 @@ export default function LudoPage() {
         if (x > 8 && y > 8) return styles.cellBlue;
         if (x < 6 && y > 8) return styles.cellRed;
         
-
         if (x >= 6 && x <= 8 && y >= 6 && y <= 8) {
             if (x === 6 && y === 6) return styles.cellGreen;
             if (x === 7 && y === 6) return styles.cellGreen;
@@ -209,10 +306,14 @@ export default function LudoPage() {
 
             if (x === 7 && y === 7) return styles.cellWhite;
         }
+        
+        if (x === 1 && y === 6) return styles.cellGreenStart;
+        if (x === 8 && y === 1) return styles.cellYellowStart;
+        if (x === 13 && y === 8) return styles.cellBlueStart;
+        if (x === 6 && y === 13) return styles.cellRedStart;
 
         return styles.cellWhite;
     };
-
 
     // Renderizar el tablero
     const renderBoard = () => {
@@ -265,7 +366,6 @@ export default function LudoPage() {
                                 styles.pieceRed
                             ][playerHome];
                             
-                            // CORREGIDO: Hacer clickeable si es el turno y puede mover
                             const canMove = gameState.currentPlayer === playerHome && 
                                            canMovePiece(playerHome, spotIndex) && 
                                            gameState.diceValue !== null;
@@ -303,10 +403,14 @@ export default function LudoPage() {
                                                    gameState.diceValue !== null;
                                     const sizeClass = canMove ? styles.pieceLarge : styles.pieceMedium;
                                     
+                                    const isAnimating = gameState.animatingPieces[`${playerId}-${pieceIdx}`];
+                                    const isCaptured = gameState.capturedPieces[`${playerId}-${pieceIdx}`];
+                                    const animClass = isCaptured ? styles.pieceCaptured : (isAnimating ? styles.pieceMoving : '');
+                                    
                                     content = (
                                         <div
                                             onClick={() => canMove && movePiece(pieceIdx)}
-                                            className={`${styles.piece} ${sizeClass} ${pieceColorClass}`}
+                                            className={`${styles.piece} ${sizeClass} ${pieceColorClass} ${animClass}`}
                                             style={{ cursor: canMove ? 'pointer' : 'default' }}
                                         ></div>
                                     );
@@ -341,10 +445,13 @@ export default function LudoPage() {
                                                    gameState.diceValue !== null;
                                     const sizeClass = canMove ? styles.pieceLarge : styles.pieceMedium;
                                     
+                                    const isAnimating = gameState.animatingPieces[`${playerId}-${pieceIdx}`];
+                                    const animClass = isAnimating ? styles.pieceMoving : '';
+                                    
                                     content = (
                                         <div
                                             onClick={() => canMove && movePiece(pieceIdx)}
-                                            className={`${styles.piece} ${sizeClass} ${pieceColorClass}`}
+                                            className={`${styles.piece} ${sizeClass} ${pieceColorClass} ${animClass}`}
                                             style={{ cursor: canMove ? 'pointer' : 'default' }}
                                         ></div>
                                     );
@@ -372,26 +479,70 @@ export default function LudoPage() {
 
     return (
         <div className={styles.container}>
-            <h1 className={styles.title}>LUDO</h1>
-
-            <div className={styles.turnIndicator}>
-                <div
-                    className={`${styles.turnText} ${
-                        gameState.currentPlayer === 0
-                            ? styles.turnTextGreen
-                            : gameState.currentPlayer === 1
-                            ? styles.turnTextYellow
-                            : gameState.currentPlayer === 2
-                            ? styles.turnTextBlue
-                            : styles.turnTextRed
-                    }`}
-                >
-                    Turno: {players[gameState.currentPlayer].name}
+    
+            <div className={styles.playersContainer}>
+                {/* Jugadores Izquierda (1 arriba, 4 abajo) */}
+                <div className={styles.leftPlayers}>
+                    {/* Jugador 1 - Verde */}
+                    <div className={`${styles.playerIndicator} ${gameState.currentPlayer === 0 ? styles.active : ''}`}
+                         style={{ borderColor: gameState.currentPlayer === 0 ? '#15803d' : 'transparent' }}>
+                        <div className={`${styles.playerColorDot} ${styles.green}`}></div>
+                        <div className={styles.playerName}>Jugador 1</div>
+                        <div className={styles.playerPieces}>
+                            {gameState.piecePositions[0].filter(pos => pos !== -1).length} pieza/s afuera
+                        </div>
+                        {gameState.currentPlayer === 0 && (
+                            <div className={styles.playerTurnLabel}>Su turno!</div>
+                        )}
+                    </div>
+    
+                    {/* Jugador 4 - Rojo */}
+                    <div className={`${styles.playerIndicator} ${gameState.currentPlayer === 3 ? styles.active : ''}`}
+                         style={{ borderColor: gameState.currentPlayer === 3 ? '#990906' : 'transparent' }}>
+                        <div className={`${styles.playerColorDot} ${styles.red}`}></div>
+                        <div className={styles.playerName}>Jugador 4</div>
+                        <div className={styles.playerPieces}>
+                            {gameState.piecePositions[3].filter(pos => pos !== -1).length} pieza/s afuera
+                        </div>
+                        {gameState.currentPlayer === 3 && (
+                            <div className={styles.playerTurnLabel}>Su turno!</div>
+                        )}
+                    </div>
+                </div>
+    
+                {/* Tablero en el centro */}
+                <div className={styles.boardContainer}>{renderBoard()}</div>
+    
+                {/* Jugadores Derecha (2 arriba, 3 abajo) */}
+                <div className={styles.rightPlayers}>
+                    {/* Jugador 2 - Amarillo */}
+                    <div className={`${styles.playerIndicator} ${gameState.currentPlayer === 1 ? styles.active : ''}`}
+                         style={{ borderColor: gameState.currentPlayer === 1 ? '#cc9f02' : 'transparent' }}>
+                        <div className={`${styles.playerColorDot} ${styles.yellow}`}></div>
+                        <div className={styles.playerName}>Jugador 2</div>
+                        <div className={styles.playerPieces}>
+                            {gameState.piecePositions[1].filter(pos => pos !== -1).length} pieza/s afuera
+                        </div>
+                        {gameState.currentPlayer === 1 && (
+                            <div className={styles.playerTurnLabel}>Su turno!</div>
+                        )}
+                    </div>
+    
+                    {/* Jugador 3 - Azul */}
+                    <div className={`${styles.playerIndicator} ${gameState.currentPlayer === 2 ? styles.active : ''}`}
+                         style={{ borderColor: gameState.currentPlayer === 2 ? '#1d4ed8' : 'transparent' }}>
+                        <div className={`${styles.playerColorDot} ${styles.blue}`}></div>
+                        <div className={styles.playerName}>Jugador 3</div>
+                        <div className={styles.playerPieces}>
+                            {gameState.piecePositions[2].filter(pos => pos !== -1).length} pieza/s afuera
+                        </div>
+                        {gameState.currentPlayer === 2 && (
+                            <div className={styles.playerTurnLabel}>Su turno!</div>
+                        )}
+                    </div>
                 </div>
             </div>
-
-            <div className={styles.boardContainer}>{renderBoard()}</div>
-
+    
             <div className={styles.diceContainer}>
                 <button
                     onClick={rollDice}
@@ -404,7 +555,7 @@ export default function LudoPage() {
                     {gameState.diceValue || 'Tirar'}
                 </button>
             </div>
-
+    
             <div className={styles.rulesContainer}>
                 <p className={styles.rulesTitle}>Reglas:</p>
                 <p className={styles.rulesText}>• Saca 6 para salir de la base</p>
