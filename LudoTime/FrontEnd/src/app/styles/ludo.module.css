@@ -6,6 +6,9 @@
   min-height: 100vh;
   background: linear-gradient(to bottom right, #e0e7ff, #f3e8ff);
   padding: 2rem;
+  background-image: url("../../../public/assets/bgImageWhite.png");
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .title {
