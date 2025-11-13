@@ -423,17 +423,19 @@ export default function LudoPage() {
                 
                 Object.keys(finalPaths).forEach(playerId => {
                     const pid = parseInt(playerId);
-                    if (pid < numPlayers) {
-                        finalPaths[playerId].forEach((pos, idx) => {
-                            if (pos.x === x && pos.y === y) {
-                                const pathColorClass = [
-                                    styles.cellGreenPath,
-                                    styles.cellYellowPath,
-                                    styles.cellBluePath,
-                                    styles.cellRedPath
-                                ][playerId];
-                                cellClass = `${styles.cell} ${pathColorClass}`;
-                                
+                    finalPaths[playerId].forEach((pos, idx) => {
+                        if (pos.x === x && pos.y === y) {
+                            // ESTO SIEMPRE SE EJECUTA - renderiza el camino de color
+                            const pathColorClass = [
+                                styles.cellGreenPath,
+                                styles.cellYellowPath,
+                                styles.cellBluePath,
+                                styles.cellRedPath
+                            ][playerId];
+                            cellClass = `${styles.cell} ${pathColorClass}`;
+
+                            // SOLO esto se condiciona - renderizar fichas
+                            if (pid < numPlayers) {
                                 gameState.piecePositions[playerId]?.forEach((piecePos, pieceIdx) => {
                                     if (piecePos === 52 + idx) {
                                         const pieceColorClass = [
@@ -442,15 +444,15 @@ export default function LudoPage() {
                                             styles.pieceBlue,
                                             styles.pieceRed
                                         ][playerId];
-                                        
+
                                         const canMove = gameState.currentPlayer == playerId && 
                                                        canMovePiece(playerId, pieceIdx) && 
                                                        gameState.diceValue !== null;
                                         const sizeClass = canMove ? styles.pieceLarge : styles.pieceMedium;
-                                        
+
                                         const isAnimating = gameState.animatingPieces[`${playerId}-${pieceIdx}`];
                                         const animClass = isAnimating ? styles.pieceMoving : '';
-                                        
+
                                         content = (
                                             <div
                                                 onClick={() => canMove && movePiece(pieceIdx)}
@@ -461,9 +463,9 @@ export default function LudoPage() {
                                     }
                                 });
                             }
-                        });
-                    }
-                });
+                        }
+                    });
+                });             
                 
                 if (x === 0 && y === 7) content = <span className={`${styles.arrow} ${styles.arrowGreen}`}>→</span>;
                 if (x === 7 && y === 0) content = <span className={`${styles.arrow} ${styles.arrowYellow}`}>↓</span>;
