@@ -12,44 +12,245 @@
   font-family: "Momo Trust Display", sans-serif;
 }
 
-.title {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  color: #312e81;
+/* PANEL DE CARTAS */
+.cardPanel {
+  position: fixed;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 100;
 }
 
-.turnIndicator {
-  margin-bottom: 1.5rem;
+.cardPanelTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 1rem;
   text-align: center;
-  background-color: white;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.turnText {
-  font-size: 1.875rem;
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  border: 3px solid;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.cardName {
   font-weight: bold;
+  font-size: 1.1rem;
+  color: #1f2937;
 }
 
-.turnTextGreen {
-  color: #15803d;
+.cardDesc {
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: center;
 }
 
-.turnTextYellow {
-  color: #ca8a04;
+.useCardButton {
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.turnTextBlue {
-  color: #1d4ed8;
+.useCardButton:hover {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  transform: scale(1.05);
 }
 
-.turnTextRed {
-  color: #dc2626;
+.noCard {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 2rem 0;
 }
 
-/* Indicadores de jugadores - SOLO A LOS LADOS */
+/* ICONO DE CARTA EN TABLERO */
+.cardIcon {
+  color: #fbbf24;
+  animation: sparkle 1.5s infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+}
+
+/* NOTIFICACIÓN DE CARTA */
+.cardNotification {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.cardNotificationContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cardNotificationContent h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0;
+}
+
+.cardPreview {
+  background: white;
+  border: 3px solid;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cardPreviewName {
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+/* MODAL DE SELECCIÓN */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modalContent {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease-out;
+  min-width: 400px;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modalTitle {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #1f2937;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.playerSelection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.playerSelectButton {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.playerSelectButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cancelButton {
+  width: 100%;
+  padding: 0.75rem;
+  background: #9ca3af;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancelButton:hover {
+  background: #6b7280;
+}
+
+/* INDICADORES DE JUGADORES */
 .playersContainer {
   display: flex;
   align-items: center;
@@ -78,6 +279,21 @@
   transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   border: 3px solid currentColor;
+}
+
+.playerIndicator.blocked {
+  background-color: #fee2e2;
+  opacity: 0.7;
+}
+
+.blockedLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background-color: #dc2626;
+  color: white;
 }
 
 .playerColorDot {
@@ -129,14 +345,6 @@
   color: white;
 }
 
-.boardWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Grupos de jugadores */
 .leftPlayers {
   display: flex;
   flex-direction: column;
@@ -149,6 +357,7 @@
   gap: 1.5rem;
 }
 
+/* TABLERO */
 .boardContainer {
   display: grid;
   grid-template-columns: repeat(15, 1fr);
@@ -222,12 +431,6 @@
   background-color: #fca5a5;
 }
 
-.star {
-  color: #9ca3af;
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
 .arrow {
   font-size: 1.25rem;
   font-weight: bold;
@@ -250,27 +453,19 @@
   color: #dc2626;
 }
 
+/* FICHAS */
 .piece {
   border-radius: 50%;
   border: 2px solid white;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  position: relative;  
-  z-index: 1;          
-}
-
-.pieceLarge {
-  width: 1.75rem;
-  height: 1.75rem;
-  cursor: pointer;
-  box-shadow: 0 0 0 3px white, 0 0 10px rgba(255, 255, 255, 0.8);
-  animation: pulse 1s infinite;
-  z-index: 10 !important;
+  position: relative;
+  z-index: 1;
 }
 
 .pieceGreen {
   background-color: #00bf63;
-  border: 2px solid #15803d
+  border: 2px solid #15803d;
 }
 
 .pieceYellow {
@@ -288,19 +483,40 @@
   border: 2px solid #990906;
 }
 
-.pieceSmall {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
 .pieceMedium {
   width: 2rem;
   height: 2rem;
 }
 
+.pieceLarge {
+  width: 1.75rem;
+  height: 1.75rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px white, 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: pulse 1s infinite;
+}
 
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
 
-/* Animaciones de movimiento */
+.pieceLarge:hover {
+  transform: scale(1.2);
+}
+
+.pieceMoving {
+  animation: moveToPosition 0.5s ease-in-out;
+}
+
+.pieceCaptured {
+  animation: capturedPiece 0.5s ease-in-out;
+}
+
 @keyframes moveToPosition {
   0% {
     transform: scale(1);
@@ -336,27 +552,7 @@
   }
 }
 
-.pieceMoving {
-  animation: moveToPosition 0.5s ease-in-out;
-}
-
-.pieceCaptured {
-  animation: capturedPiece 0.5s ease-in-out;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-.pieceLarge:hover {
-  transform: scale(1.2);
-}
-
+/* DADOS */
 .diceContainer {
   display: flex;
   align-items: center;
@@ -393,6 +589,7 @@
   cursor: not-allowed;
 }
 
+/* REGLAS */
 .rulesContainer {
   margin-top: 1.5rem;
   font-size: 0.875rem;
@@ -414,7 +611,7 @@
   margin: 0.25rem 0;
 }
 
-/* ========== PANTALLA DE VICTORIA ========== */
+/* PANTALLA DE VICTORIA */
 .victoryOverlay {
   position: fixed;
   top: 0;
@@ -534,15 +731,3 @@
   font-size: 3rem;
   margin-bottom: 1rem;
 }
-
-
-
-
-
-
-
-
-
-
-
-

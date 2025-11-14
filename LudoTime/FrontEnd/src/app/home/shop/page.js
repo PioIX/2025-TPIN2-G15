@@ -19,8 +19,7 @@ export default function ShopPage() {
   const menuItems = [
     { text: "Inicio", href: "../../home" },
     { text: "Perfil", href: "../../navhambar/profile" },
-    { text: "Ayuda", href: "../../navhambar/help" },
-    { text: "Configuración", href: "../../navhambar/settings" },
+    { text: "Reglas", href: "../../navhambar/rules" },
     { text: "Cerrar sesión", href:"../../navhambar/logout" },
   ];
 

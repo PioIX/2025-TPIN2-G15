@@ -3,10 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Dices } from 'lucide-react';
 import styles from '@/app/styles/ludo.module.css';
+import { useRouter } from 'next/navigation';
 
 export default function LudoPage() {
     const searchParams = useSearchParams();
     
+
+    const router = useRouter();
+
+    const salirALocal = () => {
+        router.push("../../local");
+    };
+
     const numPlayers = parseInt(searchParams.get('players')) || 4;
     const safeEnabled = searchParams.get('safe') !== 'false';
     
@@ -36,6 +44,8 @@ export default function LudoPage() {
             capturedPieces: {}
         };
     });
+
+    const [winner, setWinner] = useState(null);
     
     const mainPath = [
         { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 3, y: 6 }, { x: 4, y: 6 }, { x: 5, y: 6 },
@@ -62,6 +72,22 @@ export default function LudoPage() {
     const startPositions = { 0: 0, 1: 13, 2: 26, 3: 39 };
     const safeSpots = safeEnabled ? [8, 21, 34, 47] : [];
     
+
+    //ESTO ES SOLO PARA GANAR AL INSTANTE Y PROBAR LA PANTALLA DE VICTORIA
+    const winInstantly = () => {
+        const newPositions = { ...gameState.piecePositions };
+        // Poner todas las fichas del jugador actual en la meta
+        newPositions[gameState.currentPlayer] = [58, 58, 58, 58];
+        
+        setGameState(prev => ({
+            ...prev,
+            piecePositions: newPositions
+        }));
+
+        checkWinner(newPositions);
+    };
+
+
     const rollDice = () => {
         if (!gameState.canRoll) return;
         const value = Math.floor(Math.random() * 6) + 1;
@@ -105,6 +131,18 @@ export default function LudoPage() {
         const positions = gameState.piecePositions[playerId];
         return positions.some((pos, idx) => canMovePiece(playerId, idx));
     };
+
+    const checkWinner = (positions) => {
+        for (let playerId = 0; playerId < numPlayers; playerId++) {
+            const playerPositions = positions[playerId];
+            // Verificar si las 4 fichas están en posición 58 (meta)
+            if (playerPositions.every(pos => pos === 58)) {
+                setWinner(playerId);
+                return true;
+            }
+        }
+        return false;
+    };
     
     const movePiece = async (pieceIndex) => {
         const playerId = gameState.currentPlayer;
@@ -117,43 +155,58 @@ export default function LudoPage() {
         
         let newPos;
         if (currentPos === -1) {
+            // Salir de la base
             newPos = startPositions[playerId];
             await animateMovement(playerId, pieceIndex, currentPos, newPos, 1);
         } else if (currentPos >= 52) {
+            // Ya está en el camino final
             newPos = currentPos + dice;
             if (newPos > 57) {
-                alert(`¡${players[playerId].name} ha completado una ficha!`);
                 newPos = 58;
             }
             await animateMovement(playerId, pieceIndex, currentPos, newPos, dice);
         } else {
+            // Está en el camino principal (0-51)
             const startPos = startPositions[playerId];
-            let tempPos = currentPos + dice;
+            const entryPos = (startPos + 51) % 52; // Posición de entrada al camino final
             
-            let shouldEnterHome = false;
-            let stepsIntoHome = 0;
+            let stepsRemaining = dice;
+            let tempPos = currentPos;
+            let shouldEnterFinal = false;
             
+            // Simular el movimiento paso a paso
             for (let step = 1; step <= dice; step++) {
-                let checkPos = (currentPos + step) % 52;
+                let nextPos = (tempPos + 1) % 52;
                 
-                if (currentPos >= startPos && checkPos < currentPos) {
-                    let actualStep = currentPos + step;
-                    if (actualStep >= startPos + 52) {
-                        shouldEnterHome = true;
-                        stepsIntoHome = actualStep - (startPos + 51);
+                // Verificar si pasamos por la entrada al camino final
+                if (tempPos < entryPos && nextPos >= entryPos && tempPos >= startPos) {
+                    shouldEnterFinal = true;
+                    stepsRemaining = dice - step;
+                    break;
+                }
+                // Verificar si damos la vuelta completa y pasamos por la entrada
+                if (tempPos >= startPos && nextPos < startPos) {
+                    // Dimos la vuelta, verificar si llegamos a la entrada
+                    let stepsToEntry = (52 - tempPos) + entryPos;
+                    if (step + stepsToEntry <= dice) {
+                        shouldEnterFinal = true;
+                        stepsRemaining = dice - step - stepsToEntry;
                         break;
                     }
                 }
+                
+                tempPos = nextPos;
             }
             
-            if (shouldEnterHome && stepsIntoHome > 0) {
-                newPos = 52 + stepsIntoHome - 1;
+            if (shouldEnterFinal) {
+                // Entrar al camino final
+                newPos = 52 + stepsRemaining;
                 if (newPos > 57) {
-                    alert(`¡${players[playerId].name} ha completado una ficha!`);
                     newPos = 58;
                 }
             } else {
-                newPos = tempPos % 52;
+                // Continuar en el camino principal
+                newPos = (currentPos + dice) % 52;
             }
             
             await animateMovement(playerId, pieceIndex, currentPos, newPos, dice);
@@ -184,6 +237,10 @@ export default function LudoPage() {
             selectedPiece: null,
             animatingPieces: {}
         }));
+        
+        if (checkWinner(newPositions)) {
+            return;
+        }
         
         if (dice === 6 || capturedPiece) {
             setGameState(prev => ({ ...prev, canRoll: true, diceValue: null }));
@@ -293,7 +350,7 @@ export default function LudoPage() {
         
         return styles.cellWhite;
     };
-    
+
     const renderBoard = () => {
         const cells = [];
         
@@ -301,26 +358,31 @@ export default function LudoPage() {
             for (let x = 0; x < 15; x++) {
                 let cellClass = `${styles.cell} ${getCellStyle(x, y)}`;
                 let content = null;
-                
+
+                // ⭐ PRIMERO: Renderizar flechas (ANTES de las fichas)
+                if (x === 0 && y === 7) content = <span className={`${styles.arrow} ${styles.arrowGreen}`}>→</span>;
+                if (x === 7 && y === 0) content = <span className={`${styles.arrow} ${styles.arrowYellow}`}>↓</span>;
+                if (x === 14 && y === 7) content = <span className={`${styles.arrow} ${styles.arrowBlue}`}>←</span>;
+                if (x === 7 && y === 14) content = <span className={`${styles.arrow} ${styles.arrowRed}`}>↑</span>;
+
                 const isInGreenHome = (x >= 1 && x <= 4 && y >= 1 && y <= 4);
                 const isInYellowHome = (x >= 10 && x <= 13 && y >= 1 && y <= 4);
                 const isInBlueHome = (x >= 10 && x <= 13 && y >= 10 && y <= 13);
                 const isInRedHome = (x >= 1 && x <= 4 && y >= 10 && y <= 13);
-                
-                // AQUÍ ESTABA EL PROBLEMA - AHORA SIEMPRE RENDERIZA LAS 4 CASAS
+
                 if (isInGreenHome || isInYellowHome || isInBlueHome || isInRedHome) {
                     cellClass = `${styles.cell} ${styles.cellWhite}`;
-                    
+
                     const homeSpots = {
                         green: [[2, 2], [3, 2], [2, 3], [3, 3]],
                         yellow: [[11, 2], [12, 2], [11, 3], [12, 3]],
                         blue: [[11, 11], [12, 11], [11, 12], [12, 12]],
                         red: [[2, 11], [3, 11], [2, 12], [3, 12]]
                     };
-                    
+
                     let playerHome = null;
                     let spotIndex = -1;
-                    
+
                     if (isInGreenHome) {
                         playerHome = 0;
                         spotIndex = homeSpots.green.findIndex(([sx, sy]) => sx === x && sy === y);
@@ -334,10 +396,8 @@ export default function LudoPage() {
                         playerHome = 3;
                         spotIndex = homeSpots.red.findIndex(([sx, sy]) => sx === x && sy === y);
                     }
-                    
-                    // Renderiza fichas para TODOS los jugadores (estén activos o no)
+
                     if (spotIndex !== -1 && playerHome !== null) {
-                        // Si el jugador está activo, usa su posición del estado
                         if (playerHome < numPlayers) {
                             const piecePos = gameState.piecePositions[playerHome]?.[spotIndex];
                             if (piecePos === -1) {
@@ -347,12 +407,12 @@ export default function LudoPage() {
                                     styles.pieceBlue,
                                     styles.pieceRed
                                 ][playerHome];
-                                
+
                                 const canMove = gameState.currentPlayer === playerHome && 
                                             canMovePiece(playerHome, spotIndex) && 
                                             gameState.diceValue !== null;
                                 const sizeClass = canMove ? styles.pieceLarge : styles.pieceMedium;
-                                
+
                                 content = (
                                     <div 
                                         onClick={() => canMove && movePiece(spotIndex)}
@@ -362,14 +422,13 @@ export default function LudoPage() {
                                 );
                             }
                         } else {
-                            // Si el jugador NO está activo, renderiza fichas estáticas
                             const pieceColorClass = [
                                 styles.pieceGreen,
                                 styles.pieceYellow,
                                 styles.pieceBlue,
                                 styles.pieceRed
                             ][playerHome];
-                            
+
                             content = (
                                 <div 
                                     className={`${styles.piece} ${styles.pieceMedium} ${pieceColorClass}`}
@@ -379,13 +438,15 @@ export default function LudoPage() {
                         }
                     }
                 }
-                
+
+                // Renderizar fichas en el camino principal
                 mainPath.forEach((pos, idx) => {
                     if (pos.x === x && pos.y === y) {
-                        if (safeEnabled && safeSpots.includes(idx)) {
+                        // Solo agregar estrella si NO hay contenido previo (flecha)
+                        if (!content && safeEnabled && safeSpots.includes(idx)) {
                             content = <div className={styles.star}>★</div>;
                         }
-                        
+
                         Object.keys(gameState.piecePositions).forEach(playerId => {
                             const pid = parseInt(playerId);
                             if (pid < numPlayers) {
@@ -397,16 +458,16 @@ export default function LudoPage() {
                                             styles.pieceBlue,
                                             styles.pieceRed
                                         ][playerId];
-                                        
+
                                         const canMove = gameState.currentPlayer == playerId && 
                                                        canMovePiece(playerId, pieceIdx) && 
                                                        gameState.diceValue !== null;
                                         const sizeClass = canMove ? styles.pieceLarge : styles.pieceMedium;
-                                        
+
                                         const isAnimating = gameState.animatingPieces[`${playerId}-${pieceIdx}`];
                                         const isCaptured = gameState.capturedPieces[`${playerId}-${pieceIdx}`];
                                         const animClass = isCaptured ? styles.pieceCaptured : (isAnimating ? styles.pieceMoving : '');
-                                        
+
                                         content = (
                                             <div
                                                 onClick={() => canMove && movePiece(pieceIdx)}
@@ -420,12 +481,12 @@ export default function LudoPage() {
                         });
                     }
                 });
-                
+
+                // Renderizar fichas en caminos finales
                 Object.keys(finalPaths).forEach(playerId => {
                     const pid = parseInt(playerId);
                     finalPaths[playerId].forEach((pos, idx) => {
                         if (pos.x === x && pos.y === y) {
-                            // ESTO SIEMPRE SE EJECUTA - renderiza el camino de color
                             const pathColorClass = [
                                 styles.cellGreenPath,
                                 styles.cellYellowPath,
@@ -434,7 +495,6 @@ export default function LudoPage() {
                             ][playerId];
                             cellClass = `${styles.cell} ${pathColorClass}`;
 
-                            // SOLO esto se condiciona - renderizar fichas
                             if (pid < numPlayers) {
                                 gameState.piecePositions[playerId]?.forEach((piecePos, pieceIdx) => {
                                     if (piecePos === 52 + idx) {
@@ -465,13 +525,8 @@ export default function LudoPage() {
                             }
                         }
                     });
-                });             
-                
-                if (x === 0 && y === 7) content = <span className={`${styles.arrow} ${styles.arrowGreen}`}>→</span>;
-                if (x === 7 && y === 0) content = <span className={`${styles.arrow} ${styles.arrowYellow}`}>↓</span>;
-                if (x === 14 && y === 7) content = <span className={`${styles.arrow} ${styles.arrowBlue}`}>←</span>;
-                if (x === 7 && y === 14) content = <span className={`${styles.arrow} ${styles.arrowRed}`}>↑</span>;
-                
+                });
+
                 cells.push(
                     <div key={`${x}-${y}`} className={cellClass}>
                         {content}
@@ -557,6 +612,17 @@ export default function LudoPage() {
                     <Dices size={36} />
                     {gameState.diceValue || 'Tirar'}
                 </button>
+                <button
+                    onClick={winInstantly}
+                    className={styles.diceButton}
+                    style={{ 
+                        background: 'linear-gradient(to right, #ef4444, #dc2626)',
+                        padding: '1rem 2rem',
+                        fontSize: '1rem'
+                    }}
+                >
+                    🏆 Victoria instantánea (TEST)
+                </button>
             </div>
             
             <div className={styles.rulesContainer}>
@@ -567,6 +633,41 @@ export default function LudoPage() {
                 <p className={styles.rulesText}>• Tres 6 seguidos = pierdes el turno</p>
                 <p className={styles.rulesText}>• Jugadores: {numPlayers}</p>
             </div>
+
+            {/* PANTALLA DE VICTORIA */}
+            {winner !== null && (
+                <div className={styles.victoryOverlay}>
+                    <div className={styles.victoryCard}>
+                        <div className={styles.confetti}>🎉 🎊 🏆 🎉 🎊</div>
+                        <h1 className={`${styles.victoryTitle} ${
+                            winner === 0 ? styles.victoryWinnerGreen :
+                            winner === 1 ? styles.victoryWinnerYellow :
+                            winner === 2 ? styles.victoryWinnerBlue :
+                            styles.victoryWinnerRed
+                        }`}>
+                            ¡VICTORIA!
+                        </h1>
+                        <p className={styles.victoryMessage}>
+                            {winner === 0 ? '🟢 Jugador 1 (Verde)' :
+                             winner === 1 ? '🟡 Jugador 2 (Amarillo)' :
+                             winner === 2 ? '🔵 Jugador 3 (Azul)' :
+                             '🔴 Jugador 4 (Rojo)'} ha ganado la partida!
+                        </p>
+                        <button 
+                            className={styles.victoryButton1}
+                            onClick={() => window.location.reload()}
+                        >
+                            Jugar de nuevo
+                        </button>
+                        <button 
+                            className={styles.victoryButton2}
+                            onClick={salirALocal}
+                        >
+                            Salir
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

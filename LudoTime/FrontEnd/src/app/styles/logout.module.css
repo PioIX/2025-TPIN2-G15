@@ -1,14 +1,14 @@
-/* styles/Logout.module.css */
-
-.container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #2f2f2f;
-  color: white;
-  font-family: 'Arial', sans-serif;
-  
+/* ===========================
+   Fondo y layout base
+   =========================== */
+.screen {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 2rem;
 }
 
 .bg {
@@ -22,27 +22,171 @@
     background-repeat: no-repeat;
 }
 
+.tint {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .6);
+    z-index: -1;
+}
+
+/* ===========================
+   Tarjeta principal
+   =========================== */
+.card {
+    background: rgba(0, 0, 0, .7);
+    border-radius: 24px;
+    padding: 48px 32px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+    text-align: center;
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Logo */
+.logoHolder {
+    position: relative;
+    width: 350px;
+    height: 70px;
+    margin: 0 auto 32px;
+}
+
+.logoImg {
+    object-fit: contain;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .6));
+}
+
+/* ===========================
+   Contenido
+   =========================== */
 .content {
-  text-align: center;
-  background-color: #3d3d3d;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #ffcc00;
+    color: #f2b61d;
+    font-weight: 900;
+    font-size: clamp(28px, 4vw, 38px);
+    letter-spacing: .12em;
+    margin: 0;
+    text-transform: uppercase;
 }
 
 .message {
-  margin-top: 20px;
-  font-size: 1.2rem;
+    color: #e5e7eb;
+    font-size: clamp(16px, 2.2vw, 20px);
+    font-weight: 500;
+    letter-spacing: .06em;
+    margin: 0;
+    line-height: 1.6;
 }
 
-.redirect {
-  margin-top: 10px;
-  font-size: 1rem;
-  color: #bbb;
+/* ===========================
+   Botones
+   =========================== */
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.confirmBtn,
+.cancelBtn {
+    padding: 16px 32px;
+    border: 0;
+    border-radius: 9999px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: lowercase;
+    cursor: pointer;
+    font-size: clamp(16px, 2vw, 20px);
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, .3);
+}
+
+.confirmBtn {
+    background: #ef4444;
+    color: white;
+}
+
+.confirmBtn:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, .3);
+}
+
+.confirmBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, .3);
+}
+
+.cancelBtn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
+    border: 2px solid rgba(242, 182, 29, 0.4);
+}
+
+.cancelBtn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #f2b61d;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, .2);
+}
+
+.cancelBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, .2);
+}
+
+/* ===========================
+   Countdown
+   =========================== */
+.countdown {
+    color: #9ca3af;
+    font-size: clamp(13px, 1.8vw, 16px);
+    font-weight: 500;
+    margin: 8px 0 0;
+    font-style: italic;
+    animation: pulse 10s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ===========================
+   Responsive
+   =========================== */
+@media (max-width: 720px) {
+    .card {
+        padding: 36px 24px;
+    }
+
+    .logoHolder {
+        width: 240px;
+        height: 48px;
+    }
+
+    .buttons {
+        gap: 10px;
+    }
 }
