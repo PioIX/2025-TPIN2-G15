@@ -315,7 +315,7 @@ app.get("/api/shop/balance/:userId", async (req, res) => {
 // Comprar un item
 app.post("/api/shop/purchase", async (req, res) => {
     const connection = await pool.getConnection();
-
+    
     try {
         const { userId, itemId } = req.body;
 
@@ -365,9 +365,9 @@ app.post("/api/shop/purchase", async (req, res) => {
         // Verificar que tiene suficientes lodux
         if (loduxActual < precio) {
             await connection.rollback();
-            return res.status(400).json({
-                ok: false,
-                msg: `No tienes suficientes lodux. Necesitas ${precio - loduxActual} más`
+            return res.status(400).json({ 
+                ok: false, 
+                msg: `No tienes suficientes lodux. Necesitas ${precio - loduxActual} más` 
             });
         }
 
@@ -385,24 +385,18 @@ app.post("/api/shop/purchase", async (req, res) => {
             [userId, itemId]
         );
 
-        // Registrar en el ledger de transacciones
-        await connection.query(
-            "INSERT INTO LoduxLedgerLT (tipo, monto, concepto, fecha) VALUES (?, ?, ?, NOW())",
-            ["purchase", precio, `Compra: ${titulo}`]
-        );
-
         await connection.commit();
 
-        res.json({
-            ok: true,
-            msg: "Compra exitosa",
+        res.json({ 
+            ok: true, 
+            msg: "Compra exitosa", 
             nuevoSaldo,
             itemComprado: titulo
         });
 
     } catch (e) {
         await connection.rollback();
-        console.error("POST /api/shop/purchase", e);
+        console.error("POST /api/shop/purchase - ERROR:", e);
         res.status(500).json({ ok: false, msg: "Error en el servidor" });
     } finally {
         connection.release();
@@ -412,7 +406,7 @@ app.post("/api/shop/purchase", async (req, res) => {
 // Dar lodux a un usuario (para admins o sistema de recompensas)
 app.post("/api/shop/grant-lodux", async (req, res) => {
     const connection = await pool.getConnection();
-
+    
     try {
         const { userId, monto, concepto } = req.body;
 
@@ -443,12 +437,6 @@ app.post("/api/shop/grant-lodux", async (req, res) => {
             );
         }
 
-        // Registrar en el ledger
-        await connection.query(
-            "INSERT INTO LoduxLedgerLT (tipo, monto, concepto, fecha) VALUES (?, ?, ?, NOW())",
-            ["grant", monto, concepto || "Lodux otorgado"]
-        );
-
         await connection.commit();
 
         // Obtener nuevo saldo
@@ -457,47 +445,17 @@ app.post("/api/shop/grant-lodux", async (req, res) => {
             [userId]
         );
 
-        res.json({
-            ok: true,
+        res.json({ 
+            ok: true, 
             msg: "Lodux otorgado exitosamente",
             nuevoSaldo: newBalance[0].lodux
         });
 
     } catch (e) {
         await connection.rollback();
-        console.error("POST /api/shop/grant-lodux", e);
+        console.error("POST /api/shop/grant-lodux - ERROR:", e);
         res.status(500).json({ ok: false, msg: "Error del servidor" });
     } finally {
         connection.release();
     }
 });
-
-
-export default async function handler(req, res) {
-    if (req.method !== 'GET') {
-        return res.status(405).json({ error: 'Método no permitido' });
-    }
-
-    try {
-        const [rows] = await pool.query(`
-    SELECT 
-        u.nombre AS player,
-        p.puntaje_classic AS classic,
-        p.puntaje_time AS time,
-        p.trofeos_total AS trophies,
-        p.puntaje_total AS total,
-        p.victorias_classic,
-        p.victorias_time,
-        (p.victorias_classic + p.victorias_time) AS victorias_total
-        FROM PuntajesLT p
-        INNER JOIN UsuariosLT u ON p.idUsuario = u.idUsuarios
-        ORDER BY p.puntaje_total DESC, p.trofeos_total DESC
-        LIMIT 10
-    `);
-
-        return res.status(200).json(rows);
-    } catch (error) {
-        console.error('❌ Error al obtener scores:', error);
-        return res.status(500).json({ error: 'Error al obtener scores' });
-    }
-}

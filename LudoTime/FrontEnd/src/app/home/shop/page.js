@@ -11,8 +11,72 @@ const CATEGORIES = [
   { key: "fichas",  label: "FICHAS",  icon: "/assets/shopItems/fichas/OverviewFichas.png" },
 ];
 
-// URL del API - ajusta según tu configuración
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+// Mapeo de claves de BD a nombres de carpetas Pack
+const PACK_NAME_MAP = {
+  // Packs de fichas
+  'ficha_insectos': 'Bichos',
+  'ficha_brainrot': 'Brainrot',
+  'ficha_emoji': 'Emojis',
+  'ficha_escudos': 'Furbo',
+  'ficha_paises': 'Paises',
+  'ficha_planeta': 'Planetas',
+  'ficha_poker': 'Poker',
+  'ficha_clasicas': 'OverviewFichas',
+  
+  // Fondos - usando la carpeta Comprables
+  'fondo_acuatico': 'FondoAcuatico',
+  'fondo_oceanico': 'FondoAcuatico',  // Alias por si en BD está como oceanico
+  'fondo_espacial': 'FondoEspacial',
+  'fondo_futurista': 'FondoFuturista',
+  'fondo_nocturno': 'FondoNocturno',
+  
+  // Tableros
+  'tablero_clasico': 'Clasico',
+  'tablero_medieval': 'Medieval',
+  'tablero_cyberpunk': 'Cyberpunk',
+  'tablero_tropical': 'Tropical',
+  'tablero_galactico': 'Galactico',
+};
+
+// Imagen individual para el círculo de preview
+const CIRCLE_IMAGE_MAP = {
+  // Fichas
+  'ficha_insectos': 'FichaBichoAmarillo.png',
+  'ficha_brainrot': 'FichaBrainrotAmarillo.png',
+  'ficha_emoji': 'FichaEmojiAmarillo.png',
+  'ficha_escudos': 'FichaFurboAmarillo.png',
+  'ficha_paises': 'FichaPaisAmarillo.png',
+  'ficha_planeta': 'FichaPlanetaAmarillo.png',
+  'ficha_poker': 'FichaPokerAmarilla.png',
+  'ficha_clasicas': 'OverviewFichas.png',
+  
+  // Fondos - miniaturas circulares
+  'fondo_acuatico': 'FondoAcuatico.png',
+  'fondo_espacial': 'FondoEspacial.png',
+  'fondo_futurista': 'FondoFuturista.png',
+  'fondo_nocturno': 'FondoNocturno.png',
+};
+
+// Imagen completa para el modal
+const MODAL_IMAGE_MAP = {
+  // Fichas
+  'ficha_insectos': 'HoverviewBichosImage.png',
+  'ficha_brainrot': 'HoverviewBrainrotsPack.png',
+  'ficha_emoji': 'HoverviewEmojisImage.png',
+  'ficha_escudos': 'HoverviewFurboImage.png',
+  'ficha_paises': 'HoverviewPaisesImage.png',
+  'ficha_planeta': 'HoverviewPlanetasImage.png',
+  'ficha_poker': 'HoverviewPokerImage.png',
+  'ficha_clasicas': 'OverviewFichas.png',
+  
+  // Fondos - imágenes completas para el modal
+  'fondo_acuatico': 'FondoAcuatico.png',
+  'fondo_espacial': 'FondoEspacial.png',
+  'fondo_futurista': 'FondoFuturista.png',
+  'fondo_nocturno': 'FondoNocturno.png',
+};
 
 export default function ShopPage() {
   
@@ -20,7 +84,6 @@ export default function ShopPage() {
     { text: "Inicio", href: "../../home" },
     { text: "Perfil", href: "../../navhambar/profile" },
     { text: "Ayuda", href: "../../navhambar/help" },
-    { text: "Configuración", href: "../../navhambar/settings" },
     { text: "Cerrar sesión", href:"../../navhambar/logout" },
   ];
 
@@ -31,10 +94,11 @@ export default function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [purchaseLoading, setPurchaseLoading] = useState(null);
   const [message, setMessage] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  // Obtener ID del usuario desde localStorage
   useEffect(() => {
-    const userData = localStorage.getItem("user");
+    const userData = localStorage.getItem("lt_user") || sessionStorage.getItem("lt_user");
+    
     if (userData) {
       try {
         const user = JSON.parse(userData);
@@ -45,7 +109,6 @@ export default function ShopPage() {
     }
   }, []);
 
-  // Cargar items y saldo cuando tenemos el userId
   useEffect(() => {
     if (!userId) return;
 
@@ -53,11 +116,9 @@ export default function ShopPage() {
       try {
         setLoading(true);
         
-        // Obtener items
         const itemsRes = await fetch(`${API_URL}/api/shop/items/${userId}`);
         const itemsData = await itemsRes.json();
         
-        // Obtener saldo
         const balanceRes = await fetch(`${API_URL}/api/shop/balance/${userId}`);
         const balanceData = await balanceRes.json();
 
@@ -79,18 +140,65 @@ export default function ShopPage() {
     [active]
   );
 
-  // Filtrar items por categoría activa
   const filteredItems = useMemo(() => {
-    return items.filter(item => item.categoria === active);
+    return items
+      .filter(item => item.categoria === active)
+      .sort((a, b) => a.precio - b.precio);
   }, [items, active]);
 
-  // Función para mostrar mensajes
   const showMessage = (text, type = "info") => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 3000);
   };
 
-  // Función para comprar un item
+  // Función para obtener la ruta de la imagen del círculo
+  const getCircleImagePath = (item) => {
+    const packName = PACK_NAME_MAP[item.clave];
+    const circleImage = CIRCLE_IMAGE_MAP[item.clave];
+    
+    // Para fichas clásicas
+    if (item.clave === 'ficha_clasicas') {
+      return `/assets/shopItems/${item.categoria}/OverviewFichas.png`;
+    }
+    
+    // Para fondos, usar la carpeta Comprables
+    if (item.categoria === 'fondos' && circleImage) {
+      return `/assets/shopItems/${item.categoria}/Comprables/${circleImage}`;
+    }
+    
+    // Para fichas con packs
+    if (packName && circleImage && item.categoria === 'fichas') {
+      return `/assets/shopItems/${item.categoria}/${packName}Pack/${circleImage}`;
+    }
+    
+    // Fallback
+    return `/assets/shopItems/${item.categoria}/${item.clave}.png`;
+  };
+
+  // Función para obtener la ruta de la imagen del modal
+  const getModalImagePath = (item) => {
+    const packName = PACK_NAME_MAP[item.clave];
+    const modalImage = MODAL_IMAGE_MAP[item.clave];
+    
+    // Para fichas clásicas
+    if (item.clave === 'ficha_clasicas') {
+      return `/assets/shopItems/${item.categoria}/OverviewFichas.png`;
+    }
+    
+    // Para fondos, usar la carpeta Comprables
+    if (item.categoria === 'fondos' && modalImage) {
+      return `/assets/shopItems/${item.categoria}/Comprables/${modalImage}`;
+    }
+    
+    // Para fichas con packs
+    if (packName && modalImage && item.categoria === 'fichas') {
+      return `/assets/shopItems/${item.categoria}/${packName}Pack/${modalImage}`;
+    }
+    
+    // Fallback
+    return `/assets/shopItems/${item.categoria}/${item.clave}.png`;
+  };
+
   const handlePurchase = async (itemId, precio, titulo) => {
     if (!userId) {
       showMessage("Debes iniciar sesión", "error");
@@ -119,12 +227,13 @@ export default function ShopPage() {
         showMessage(`¡${titulo} comprado con éxito!`, "success");
         setLodux(data.nuevoSaldo);
         
-        // Actualizar el estado del item como comprado
         setItems(prevItems =>
           prevItems.map(item =>
             item.idItem === itemId ? { ...item, comprado: 1 } : item
           )
         );
+        
+        setSelectedItem(null);
       } else {
         showMessage(data.msg || "Error al comprar", "error");
       }
@@ -134,6 +243,14 @@ export default function ShopPage() {
     } finally {
       setPurchaseLoading(null);
     }
+  };
+
+  const openModal = (item) => {
+    setSelectedItem(item);
+  };
+
+  const closeModal = () => {
+    setSelectedItem(null);
   };
 
   return (
@@ -150,7 +267,6 @@ export default function ShopPage() {
         </div>
       </header>
 
-      {/* Mensaje de notificación */}
       {message && (
         <div className={`${styles.message} ${styles[message.type]}`}>
           {message.text}
@@ -194,10 +310,30 @@ export default function ShopPage() {
               <ul className={styles.itemsGrid}>
                 {filteredItems.map((item) => (
                   <li key={item.idItem} className={styles.itemCard}>
-                    <div className={styles.itemImageContainer}>
-                      {/* Aquí deberías usar la imagen real del item basada en item.clave */}
+                    <div 
+                      className={styles.itemImageContainer}
+                      onClick={() => openModal(item)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <div className={styles.itemPlaceholder}>
-                        {item.titulo}
+                        <Image
+                          src={getCircleImagePath(item)}
+                          alt={item.titulo}
+                          fill
+                          className={styles.itemPreviewImg}
+                          onError={(e) => {
+                            const target = e.target;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent && !parent.querySelector('span')) {
+                              const span = document.createElement('span');
+                              span.textContent = item.titulo;
+                              span.style.fontSize = '12px';
+                              span.style.textAlign = 'center';
+                              parent.appendChild(span);
+                            }
+                          }}
+                        />
                       </div>
                     </div>
                     <div className={styles.itemInfo}>
@@ -207,7 +343,7 @@ export default function ShopPage() {
                           💰 {item.precio}
                         </span>
                         {item.comprado ? (
-                          <span className={styles.ownedBadge}>✓ Comprado</span>
+                          <span className={styles.ownedBadge}>¡Es tuyo!</span>
                         ) : (
                           <button
                             className={styles.buyButton}
@@ -230,6 +366,54 @@ export default function ShopPage() {
           </div>
         </div>
       </section>
+
+      {/* MODAL */}
+      {selectedItem && (
+        <div className={styles.modalOverlay} onClick={closeModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalClose} onClick={closeModal}>
+              ✕
+            </button>
+            
+            <div className={styles.modalImageContainer}>
+              <Image
+                src={getModalImagePath(selectedItem)}
+                alt={selectedItem.titulo}
+                fill
+                className={styles.modalImage}
+                onError={(e) => {
+                  const target = e.target;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent && !parent.querySelector('div')) {
+                    const div = document.createElement('div');
+                    div.className = styles.modalPlaceholder;
+                    div.textContent = selectedItem.titulo;
+                    parent.appendChild(div);
+                  }
+                }}
+              />
+            </div>
+
+            <div className={styles.modalInfo}>
+              <h2 className={styles.modalTitle}>{selectedItem.titulo}</h2>
+              <p className={styles.modalPrice}>💰 {selectedItem.precio} Lodux</p>
+              
+              {selectedItem.comprado ? (
+                <div className={styles.modalOwned}>¡Ya lo tienes!</div>
+              ) : (
+                <button
+                  className={styles.modalBuyButton}
+                  onClick={() => handlePurchase(selectedItem.idItem, selectedItem.precio, selectedItem.titulo)}
+                  disabled={purchaseLoading === selectedItem.idItem || lodux < selectedItem.precio}
+                >
+                  {purchaseLoading === selectedItem.idItem ? "Comprando..." : "Comprar Ahora"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
