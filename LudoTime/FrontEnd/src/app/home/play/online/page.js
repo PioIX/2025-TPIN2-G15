@@ -42,13 +42,6 @@ export default function OnlinePage() {
                         </div>
                     </button>
 
-                    <button className={`${styles.card} ${styles.mathbtn}`} /*onClick={}*/>
-                        <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
-                        <div className={styles.content}>
-                            <span className={styles.title}>MATH</span>
-                            <span className={styles.desc}>AGREGAR DESCRIPCION CLARA DESPUES</span>
-                        </div>
-                    </button>
 
                     <button className={`${styles.card} ${styles.timebtn}`} /*onClick={}*/>
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}

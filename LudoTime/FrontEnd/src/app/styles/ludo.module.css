@@ -9,6 +9,9 @@
   background-image: url("../../../public/assets/bgImageWhite.png");
   background-size: cover;
   background-repeat: no-repeat;
+
+  font-family: "Momo Trust Display", sans-serif;
+
 }
 
 .title {

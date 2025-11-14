@@ -32,7 +32,7 @@ export default function Home() {
         <main className={styles.body}>
             <HamburgerMenu items={menuItems} />
             <div className={styles.container}>
-                <h1 className={styles.title}>Bienvenido a LudoTime!</h1>
+                <h1 className={styles.title}>¡Bienvenido a LudoTime!</h1>
                 <button className={styles.playbtn} onClick={irAJugar}>JUGAR</button><br/>
                 <button className={styles.shopbtn} onClick={irATienda}>TIENDA</button><br/>
                 <button className={styles.scoresbtn} onClick={irAPuntajes}>PUNTAJES GLOBALES</button>
