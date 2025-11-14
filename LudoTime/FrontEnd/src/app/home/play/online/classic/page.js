@@ -11,11 +11,11 @@ export default function ClassicLobby() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const roomCode = searchParams.get('room'); // Por si vienen de un link de invitación
-    
+
     // TODO: Obtener del contexto de autenticación
     const [userId] = useState('user-' + Math.random().toString(36).substr(2, 9));
     const [userName] = useState('Jugador ' + Math.floor(Math.random() * 1000));
-    
+
     const {
         isConnected,
         error,
@@ -113,22 +113,22 @@ export default function ClassicLobby() {
 
             <section className={styles.card}>
                 <div className={styles.logoHolder}>
-                    <Image 
-                        src="/assets/mainLogo.png" 
-                        alt="LudoTime" 
-                        fill 
-                        sizes="420px" 
-                        className={styles.logoImg} 
-                        priority 
+                    <Image
+                        src="/assets/mainLogo.png"
+                        alt="LudoTime"
+                        fill
+                        sizes="420px"
+                        className={styles.logoImg}
+                        priority
                     />
                 </div>
 
                 <h2 className={styles.mode}>{modeTitle}</h2>
 
                 {/* Indicador de conexión */}
-                <div style={{ 
-                    position: 'absolute', 
-                    top: '10px', 
+                <div style={{
+                    position: 'absolute',
+                    top: '10px',
                     right: '10px',
                     fontSize: '12px',
                     color: isConnected ? '#4ade80' : '#f87171'
@@ -158,8 +158,8 @@ export default function ClassicLobby() {
                 </div>
 
                 <p className={styles.status}>
-                    {players.length < 2 
-                        ? "esperando jugadores…" 
+                    {players.length < 2
+                        ? "esperando jugadores…"
                         : "¡Listos para comenzar!"}
                 </p>
 
@@ -279,8 +279,8 @@ export default function ClassicLobby() {
                 )}
 
                 {error && (
-                    <div style={{ 
-                        marginTop: '10px', 
+                    <div style={{
+                        marginTop: '10px',
                         color: '#f87171',
                         fontSize: '12px'
                     }}>

@@ -6,6 +6,12 @@
   min-height: 100vh;
   background: linear-gradient(to bottom right, #e0e7ff, #f3e8ff);
   padding: 2rem;
+  background-image: url("../../../public/assets/bgImageWhite.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  font-family: "Momo Trust Display", sans-serif;
+
 }
 
 .title {
@@ -45,6 +51,106 @@
   color: #dc2626;
 }
 
+/* Indicadores de jugadores - SOLO A LOS LADOS */
+.playersContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.playerIndicator {
+  background-color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 175px;
+  min-height: 150px;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.playerIndicator.active {
+  opacity: 1;
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border: 3px solid currentColor;
+}
+
+.playerColorDot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.playerColorDot.green {
+  background-color: #00bf63;
+  border-color: #15803d;
+}
+
+.playerColorDot.yellow {
+  background-color: #FFCD4F;
+  border-color: #cc9f02;
+}
+
+.playerColorDot.blue {
+  background-color: #3bb4ff;
+  border-color: #1d4ed8;
+}
+
+.playerColorDot.red {
+  background-color: #dc2626;
+  border-color: #990906;
+}
+
+.playerName {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.playerPieces {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.playerTurnLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background-color: #10b981;
+  color: white;
+}
+
+.boardWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Grupos de jugadores */
+.leftPlayers {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rightPlayers {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .boardContainer {
   display: grid;
   grid-template-columns: repeat(15, 1fr);
@@ -59,7 +165,7 @@
 .cell {
   width: 2.5rem;
   height: 2.5rem;
-  border: 1px solid #9ca3af;
+  border: 1px solid #9ca3af89;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,6 +190,22 @@
 
 .cellWhite {
   background-color: white;
+}
+
+.cellGreenStart {
+  background-color: #86efac;
+}
+
+.cellYellowStart {
+  background-color: #fde047;
+}
+
+.cellBlueStart {
+  background-color: #93c5fd;
+}
+
+.cellRedStart {
+  background-color: #fca5a5;
 }
 
 .cellGreenPath {
@@ -138,19 +260,23 @@
 }
 
 .pieceGreen {
-  background-color: #15803d;
+  background-color: #00bf63;
+  border: 2px solid #15803d
 }
 
 .pieceYellow {
-  background-color: #ca8a04;
+  background-color: #FFCD4F;
+  border: 2px solid #cc9f02;
 }
 
 .pieceBlue {
-  background-color: #1d4ed8;
+  background-color: #3bb4ff;
+  border: 2px solid #1d4ed8;
 }
 
 .pieceRed {
   background-color: #dc2626;
+  border: 2px solid #990906;
 }
 
 .pieceSmall {
@@ -159,8 +285,8 @@
 }
 
 .pieceMedium {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .pieceLarge {
@@ -169,6 +295,50 @@
   cursor: pointer;
   box-shadow: 0 0 0 3px white, 0 0 10px rgba(255, 255, 255, 0.8);
   animation: pulse 1s infinite;
+}
+
+/* Animaciones de movimiento */
+@keyframes moveToPosition {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3) translateY(-5px);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes capturedPiece {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.2) rotate(90deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(0.8) rotate(180deg);
+    opacity: 0.5;
+  }
+  75% {
+    transform: scale(0.5) rotate(270deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.pieceMoving {
+  animation: moveToPosition 0.5s ease-in-out;
+}
+
+.pieceCaptured {
+  animation: capturedPiece 0.5s ease-in-out;
 }
 
 @keyframes pulse {
