@@ -1,0 +1,566 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #e0e7ff, #f3e8ff);
+  padding: 2rem;
+  background-image: url("../../../public/assets/bgImageWhite.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  font-family: "Momo Trust Display", sans-serif;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #312e81;
+}
+
+.turnIndicator {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  background-color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.turnText {
+  font-size: 1.875rem;
+  font-weight: bold;
+}
+
+.turnTextGreen {
+  color: #15803d;
+}
+
+.turnTextYellow {
+  color: #ca8a04;
+}
+
+.turnTextBlue {
+  color: #1d4ed8;
+}
+
+.turnTextRed {
+  color: #dc2626;
+}
+
+/* Indicadores de jugadores - SOLO A LOS LADOS */
+.playersContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.playerIndicator {
+  background-color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 175px;
+  min-height: 150px;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.playerIndicator.active {
+  opacity: 1;
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border: 3px solid currentColor;
+}
+
+.playerColorDot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.playerColorDot.green {
+  background-color: #00bf63;
+  border-color: #15803d;
+}
+
+.playerColorDot.yellow {
+  background-color: #FFCD4F;
+  border-color: #cc9f02;
+}
+
+.playerColorDot.blue {
+  background-color: #3bb4ff;
+  border-color: #1d4ed8;
+}
+
+.playerColorDot.red {
+  background-color: #dc2626;
+  border-color: #990906;
+}
+
+.playerName {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.playerPieces {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.playerTurnLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background-color: #10b981;
+  color: white;
+}
+
+.boardWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Grupos de jugadores */
+.leftPlayers {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rightPlayers {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.boardContainer {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 0;
+  background-color: #1f2937;
+  padding: 0.25rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cell {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid #9ca3af89;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cellGreen {
+  background-color: #22c55e;
+}
+
+.cellYellow {
+  background-color: #facc15;
+}
+
+.cellBlue {
+  background-color: #60a5fa;
+}
+
+.cellRed {
+  background-color: #ef4444;
+}
+
+.cellWhite {
+  background-color: white;
+}
+
+.cellGreenStart {
+  background-color: #86efac;
+}
+
+.cellYellowStart {
+  background-color: #fde047;
+}
+
+.cellBlueStart {
+  background-color: #93c5fd;
+}
+
+.cellRedStart {
+  background-color: #fca5a5;
+}
+
+.cellGreenPath {
+  background-color: #86efac;
+}
+
+.cellYellowPath {
+  background-color: #fde047;
+}
+
+.cellBluePath {
+  background-color: #93c5fd;
+}
+
+.cellRedPath {
+  background-color: #fca5a5;
+}
+
+.star {
+  color: #9ca3af;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.arrow {
+  font-size: 1.25rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.arrowGreen {
+  color: #15803d;
+}
+
+.arrowYellow {
+  color: #ca8a04;
+}
+
+.arrowBlue {
+  color: #1d4ed8;
+}
+
+.arrowRed {
+  color: #dc2626;
+}
+
+.piece {
+  border-radius: 50%;
+  border: 2px solid white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;  
+  z-index: 1;          
+}
+
+.pieceLarge {
+  width: 1.75rem;
+  height: 1.75rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px white, 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: pulse 1s infinite;
+  z-index: 10 !important;
+}
+
+.pieceGreen {
+  background-color: #00bf63;
+  border: 2px solid #15803d
+}
+
+.pieceYellow {
+  background-color: #FFCD4F;
+  border: 2px solid #cc9f02;
+}
+
+.pieceBlue {
+  background-color: #3bb4ff;
+  border: 2px solid #1d4ed8;
+}
+
+.pieceRed {
+  background-color: #dc2626;
+  border: 2px solid #990906;
+}
+
+.pieceSmall {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.pieceMedium {
+  width: 2rem;
+  height: 2rem;
+}
+
+
+
+/* Animaciones de movimiento */
+@keyframes moveToPosition {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3) translateY(-5px);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes capturedPiece {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.2) rotate(90deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(0.8) rotate(180deg);
+    opacity: 0.5;
+  }
+  75% {
+    transform: scale(0.5) rotate(270deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.pieceMoving {
+  animation: moveToPosition 0.5s ease-in-out;
+}
+
+.pieceCaptured {
+  animation: capturedPiece 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.pieceLarge:hover {
+  transform: scale(1.2);
+}
+
+.diceContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.diceButton {
+  padding: 1.25rem 2.5rem;
+  border-radius: 0.75rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  border: none;
+}
+
+.diceButtonActive {
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  cursor: pointer;
+}
+
+.diceButtonActive:hover {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  transform: scale(1.05);
+}
+
+.diceButtonDisabled {
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.rulesContainer {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  text-align: center;
+  max-width: 32rem;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rulesTitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.rulesText {
+  margin: 0.25rem 0;
+}
+
+/* ========== PANTALLA DE VICTORIA ========== */
+.victoryOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.victoryCard {
+  background: white;
+  padding: 3rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.6s ease-out;
+  max-width: 500px;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.victoryTitle {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.victoryWinnerGreen {
+  color: #15803d;
+}
+
+.victoryWinnerYellow {
+  color: #ca8a04;
+}
+
+.victoryWinnerBlue {
+  color: #1d4ed8;
+}
+
+.victoryWinnerRed {
+  color: #dc2626;
+}
+
+.victoryMessage {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #374151;
+}
+
+.victoryButton1 {
+  padding: 1rem 2.5rem;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.victoryButton1:hover {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+}
+
+.victoryButton2 {
+  padding: 1rem 2.5rem;
+  background: linear-gradient(to right, #b21c1c, #fb3737);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(246, 59, 59, 0.4);
+  margin-left: 10px;
+}
+
+.confetti {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.skipButton:hover {
+    opacity: 1;
+    background-color: #555;
+    font-size: 25px;
+    padding: 1.2rem;
+}
+.skipButton {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #6582a7;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: all 0.3s;
+  font-size: 23px;
+}
+
+
+
+
+
+
+
+
+
+
