@@ -16,6 +16,12 @@ export default function ClassicLobby() {
     const [userId] = useState('user-' + Math.random().toString(36).substr(2, 9));
     const [userName] = useState('Jugador ' + Math.floor(Math.random() * 1000));
 
+    // Callback para redirigir cuando el juego inicia
+    const handleGameStart = (data) => {
+        console.log('🎮 Redirigiendo al juego:', data);
+        router.push(`/home/play/online/classic/game?room=${data.roomId}&players=${data.players.length}`);
+    };
+
     const {
         isConnected,
         error,
@@ -25,7 +31,7 @@ export default function ClassicLobby() {
         joinRoom,
         leaveRoom,
         startGame
-    } = useGameSocket(userId, userName);
+    } = useGameSocket(userId, userName, handleGameStart);
 
     const [showInviteLink, setShowInviteLink] = useState(false);
     const [inviteLink, setInviteLink] = useState('');
@@ -85,8 +91,7 @@ export default function ClassicLobby() {
     const handleStartGame = () => {
         if (players.length >= 2) { // Mínimo 2 jugadores
             startGame();
-            // El servidor emitirá 'game-start' y puedes redirigir
-            router.push(`/game/${roomId}`);
+            // No redirigir aquí, esperar el evento 'game-start' del servidor
         } else {
             alert('Se necesitan al menos 2 jugadores para comenzar');
         }
