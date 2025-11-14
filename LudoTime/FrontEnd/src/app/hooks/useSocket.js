@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4001';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
 
 export function useGameSocket(userId, userName) {
     const socketRef = useRef(null);
@@ -62,6 +62,12 @@ export function useGameSocket(userId, userName) {
             // Redirigir a la página del juego
         });
 
+        socket.on('error', (data) => {
+            console.error('❌ Error del servidor:', data);
+            setError(data.message);
+            alert('Error: ' + data.message);
+        });
+
         // Limpiar al desmontar
         return () => {
             if (socket) {
@@ -83,12 +89,20 @@ export function useGameSocket(userId, userName) {
     };
 
     const joinRoom = (roomCode) => {
+        console.log('🔍 Intentando unirse a sala:', roomCode);
+        console.log('Estado conexión:', isConnected);
+        console.log('Socket existe:', !!socketRef.current);
+
         if (socketRef.current && isConnected) {
+            console.log('✅ Emitiendo join-room con:', { userId, userName, roomId: roomCode });
             socketRef.current.emit('join-room', {
                 userId,
                 userName,
                 roomId: roomCode
             });
+        } else {
+            console.error('❌ No se puede unir: socket no conectado');
+            alert('No estás conectado al servidor. Espera un momento y vuelve a intentar.');
         }
     };
 

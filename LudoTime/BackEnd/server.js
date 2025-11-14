@@ -250,9 +250,9 @@ app.patch("/api/profile/password", async (req, res) => {
 
 const io = new Server(server, {
     cors: {
-        origin: ["https://localhost:3000", "https://localhost:3001"],
+        origin: "*", // Permite conexiones desde cualquier origen
         methods: ["GET", "POST"],
-        credentials: true
+        credentials: false
     }
 });
 
@@ -260,13 +260,159 @@ const io = new Server(server, {
 //        CONFIGURACIÓN DE SOCKET.IO
 // ========================================
 
-// Objeto para almacenar usuarios conectados
+// Objeto para almacenar usuarios conectados y salas
 const connectedUsers = new Map();
+const rooms = new Map();
 
 io.on('connection', (socket) => {
     console.log('Usuario conectado:', socket.id);
 
-    // Evento: Usuario se une a una sala
+    // Evento: Crear sala
+    socket.on('create-room', (data) => {
+        const { userId, userName, gameMode, maxPlayers } = data;
+        const roomId = 'room-' + Math.random().toString(36).substr(2, 9);
+
+        // Crear información de la sala
+        const room = {
+            id: roomId,
+            gameMode,
+            maxPlayers,
+            players: [{
+                socketId: socket.id,
+                userId,
+                userName,
+                isHost: true
+            }],
+            gameState: null,
+            createdAt: new Date()
+        };
+
+        rooms.set(roomId, room);
+        connectedUsers.set(socket.id, { userId, userName, roomId, isHost: true });
+
+        socket.join(roomId);
+        console.log(`Sala creada: ${roomId} por ${userName}`);
+
+        socket.emit('room-created', {
+            roomId,
+            players: room.players
+        });
+    });
+
+    // Evento: Unirse a una sala existente
+    socket.on('join-room', (data) => {
+        const { userId, userName, roomId } = data;
+        console.log(`🔍 Intento de unirse a sala - RoomId recibido: ${roomId}`);
+        console.log(`📋 Salas disponibles:`, Array.from(rooms.keys()));
+
+        const room = rooms.get(roomId);
+
+        if (!room) {
+            console.error(`❌ Sala no encontrada: ${roomId}`);
+            socket.emit('error', { message: 'Sala no encontrada. Verifica el código.' });
+            return;
+        }
+
+        if (room.players.length >= room.maxPlayers) {
+            socket.emit('error', { message: 'Sala llena' });
+            return;
+        }
+
+        // Agregar jugador a la sala
+        const player = {
+            socketId: socket.id,
+            userId,
+            userName,
+            isHost: false
+        };
+
+        room.players.push(player);
+        connectedUsers.set(socket.id, { userId, userName, roomId, isHost: false });
+
+        socket.join(roomId);
+        console.log(`${userName} se unió a la sala: ${roomId}`);
+
+        // Notificar al jugador que se unió
+        socket.emit('room-created', {
+            roomId,
+            players: room.players
+        });
+
+        // Notificar a todos en la sala
+        io.to(roomId).emit('player-joined', {
+            players: room.players,
+            newPlayer: player
+        });
+    });
+
+    // Evento: Salir de una sala
+    socket.on('leave-room', (data) => {
+        const { roomId } = data;
+        const user = connectedUsers.get(socket.id);
+        const room = rooms.get(roomId);
+
+        if (user && room) {
+            // Remover jugador de la sala
+            room.players = room.players.filter(p => p.socketId !== socket.id);
+
+            socket.leave(roomId);
+            console.log(`${user.userName} salió de la sala: ${roomId}`);
+
+            // Si era el host, asignar nuevo host
+            if (user.isHost && room.players.length > 0) {
+                room.players[0].isHost = true;
+                const newHost = connectedUsers.get(room.players[0].socketId);
+                if (newHost) newHost.isHost = true;
+            }
+
+            // Si no quedan jugadores, eliminar la sala
+            if (room.players.length === 0) {
+                rooms.delete(roomId);
+                console.log(`Sala eliminada: ${roomId}`);
+            } else {
+                // Notificar a los demás
+                io.to(roomId).emit('player-left', {
+                    players: room.players,
+                    leftPlayer: { userId: user.userId, userName: user.userName }
+                });
+            }
+
+            connectedUsers.delete(socket.id);
+        }
+    });
+
+    // Evento: Iniciar juego
+    socket.on('start-game', (data) => {
+        const { roomId } = data;
+        const room = rooms.get(roomId);
+        const user = connectedUsers.get(socket.id);
+
+        if (!room) {
+            socket.emit('error', { message: 'Sala no encontrada' });
+            return;
+        }
+
+        if (!user || !user.isHost) {
+            socket.emit('error', { message: 'Solo el host puede iniciar el juego' });
+            return;
+        }
+
+        if (room.players.length < 2) {
+            socket.emit('error', { message: 'Se necesitan al menos 2 jugadores' });
+            return;
+        }
+
+        console.log(`Juego iniciado en sala: ${roomId}`);
+
+        // Notificar a todos en la sala que el juego comienza
+        io.to(roomId).emit('game-start', {
+            roomId,
+            players: room.players,
+            gameState: { /* estado inicial del juego */ }
+        });
+    });
+
+    // Evento: Usuario se une a una sala (legacy - mantener por compatibilidad)
     socket.on('join-game', (data) => {
         const { userId, userName, roomId } = data;
         
@@ -372,7 +518,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Evento de error
+    // Evento de    or
     socket.on('error', (error) => {
         console.error('Socket error:', error);
     });

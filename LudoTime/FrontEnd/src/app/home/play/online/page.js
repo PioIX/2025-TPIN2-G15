@@ -35,7 +35,7 @@ export default function OnlinePage() {
     */
 
     return (
-        <body className={styles.body}>
+        <div className={styles.body}>
             <HamburgerMenu items={menuItems} />
             <main>
                 <div className={styles.container}>
@@ -64,6 +64,6 @@ export default function OnlinePage() {
                     </button>
                 </div>
             </main>
-        </body>
+        </div>
     )
 }

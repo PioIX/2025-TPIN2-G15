@@ -24,28 +24,37 @@ export default function ClassicLobby() {
         createRoom,
         joinRoom,
         leaveRoom,
-        startGame,
-        invitePlayers
+        startGame
     } = useGameSocket(userId, userName);
 
     const [showInviteLink, setShowInviteLink] = useState(false);
     const [inviteLink, setInviteLink] = useState('');
+    const [showJoinInput, setShowJoinInput] = useState(false);
+    const [joinCode, setJoinCode] = useState('');
 
     const modeTitle = "Clásico";
     const maxPlayers = 4;
 
-    // Crear sala automáticamente al cargar
+    // Crear sala o unirse según el parámetro de URL
     useEffect(() => {
-        if (isConnected && !roomId) {
-            if (roomCode) {
-                // Si vienen con código, unirse a esa sala
-                joinRoom(roomCode);
-            } else {
-                // Si no, crear nueva sala
-                createRoom('classic');
-            }
+        if (isConnected && !roomId && roomCode) {
+            // Si vienen con código en la URL, unirse a esa sala
+            joinRoom(roomCode);
         }
-    }, [isConnected]);
+        // Si no hay roomCode en la URL, el usuario debe elegir crear o unirse manualmente
+    }, [isConnected, roomCode, roomId]);
+
+    const handleJoinWithCode = () => {
+        if (joinCode.trim().length >= 9) {
+            // Convertir el código a formato de roomId
+            const fullRoomId = 'room-' + joinCode.toLowerCase();
+            console.log('🔑 Código ingresado:', joinCode);
+            console.log('🔑 RoomId construido:', fullRoomId);
+            joinRoom(fullRoomId);
+        } else {
+            alert('Por favor ingresa un código válido de 9 caracteres');
+        }
+    };
 
     // Formatear lista de jugadores para mostrar
     const playerSlots = Array(maxPlayers).fill('-').map((_, i) => {
@@ -53,12 +62,23 @@ export default function ClassicLobby() {
     });
 
     const handleInvite = () => {
-        const link = invitePlayers();
-        if (link) {
-            setInviteLink(link);
+        if (roomId) {
+            // Generar código simple de 9 caracteres
+            // roomId tiene formato "room-XXXXXXXXX", extraemos los 9 caracteres después de "room-"
+            const code = roomId.substring(5).toUpperCase();
+            console.log('📋 RoomId completo:', roomId);
+            console.log('📋 Código extraído:', code);
+            console.log('📋 Longitud del código:', code.length);
+
+            setInviteLink(code);
             setShowInviteLink(true);
+
             // Copiar al portapapeles
-            alert('¡Link copiado al portapapeles!');
+            navigator.clipboard.writeText(code).then(() => {
+                alert('¡Código copiado al portapapeles! Compártelo con tus amigos: ' + code);
+            }).catch(() => {
+                alert('Código de sala: ' + code);
+            });
         }
     };
 
@@ -143,49 +163,118 @@ export default function ClassicLobby() {
                         : "¡Listos para comenzar!"}
                 </p>
 
-                <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', width: '100%' }}>
-                    <button className={styles.cta} onClick={handleInvite}>
-                        Invitar jugadores
-                    </button>
-                    
-                    {players.length >= 2 && (
-                        <button 
-                            className={styles.cta} 
-                            onClick={handleStartGame}
+                {/* Mostrar opciones si no hay roomId */}
+                {!roomId && !showJoinInput && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginTop: '20px' }}>
+                        <button
+                            className={styles.cta}
+                            onClick={() => createRoom('classic')}
                             style={{ background: '#4ade80' }}
                         >
-                            Iniciar juego
+                            Crear nueva sala
                         </button>
-                    )}
+                        <button
+                            className={styles.cta}
+                            onClick={() => setShowJoinInput(true)}
+                            style={{ background: '#3b82f6' }}
+                        >
+                            Unirse con código
+                        </button>
+                    </div>
+                )}
 
-                    <button 
-                        className={styles.cta} 
-                        onClick={handleLeave}
-                        style={{ background: '#f87171' }}
-                    >
-                        Salir
-                    </button>
-                </div>
+                {/* Mostrar input para ingresar código */}
+                {!roomId && showJoinInput && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginTop: '20px' }}>
+                        <input
+                            type="text"
+                            placeholder="Código de 9 caracteres"
+                            value={joinCode}
+                            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                            maxLength={9}
+                            style={{
+                                padding: '12px',
+                                borderRadius: '8px',
+                                border: '2px solid #444',
+                                background: '#222',
+                                color: '#fff',
+                                fontSize: '16px',
+                                textAlign: 'center',
+                                letterSpacing: '2px'
+                            }}
+                        />
+                        <button
+                            className={styles.cta}
+                            onClick={handleJoinWithCode}
+                            style={{ background: '#3b82f6' }}
+                        >
+                            Unirse a sala
+                        </button>
+                        <button
+                            className={styles.cta}
+                            onClick={() => setShowJoinInput(false)}
+                            style={{ background: '#6b7280' }}
+                        >
+                            Volver
+                        </button>
+                    </div>
+                )}
+
+                {/* Mostrar botones normales si ya está en una sala */}
+                {roomId && (
+                    <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', width: '100%' }}>
+                        <button className={styles.cta} onClick={handleInvite}>
+                            Copiar código de invitación
+                        </button>
+
+                        {players.length >= 2 && (
+                            <button
+                                className={styles.cta}
+                                onClick={handleStartGame}
+                                style={{ background: '#4ade80' }}
+                            >
+                                Iniciar juego
+                            </button>
+                        )}
+
+                        <button
+                            className={styles.cta}
+                            onClick={handleLeave}
+                            style={{ background: '#f87171' }}
+                        >
+                            Salir
+                        </button>
+                    </div>
+                )}
 
                 {showInviteLink && (
-                    <div style={{ 
-                        marginTop: '15px', 
-                        padding: '10px', 
-                        background: 'rgba(0,0,0,0.5)',
-                        borderRadius: '8px',
-                        fontSize: '12px'
+                    <div style={{
+                        marginTop: '15px',
+                        padding: '15px',
+                        background: 'rgba(0,0,0,0.7)',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        border: '2px solid #4ade80'
                     }}>
-                        <p>Comparte este link:</p>
-                        <code style={{ 
-                            display: 'block', 
-                            padding: '5px', 
+                        <p style={{ marginBottom: '10px', color: '#4ade80', fontWeight: 'bold' }}>
+                            Comparte este código con tus amigos:
+                        </p>
+                        <code style={{
+                            display: 'block',
+                            padding: '15px',
                             background: 'rgba(255,255,255,0.1)',
-                            borderRadius: '4px',
-                            marginTop: '5px',
-                            wordBreak: 'break-all'
+                            borderRadius: '8px',
+                            fontSize: '24px',
+                            fontWeight: 'bold',
+                            letterSpacing: '4px',
+                            color: '#4ade80'
                         }}>
                             {inviteLink}
                         </code>
+                        <p style={{ marginTop: '10px', fontSize: '12px', color: '#999' }}>
+                            Tus amigos deben ingresar este código cuando entren al modo Classic Online
+                        </p>
                     </div>
                 )}
 

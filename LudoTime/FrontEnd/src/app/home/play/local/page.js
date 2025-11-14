@@ -16,7 +16,7 @@ export default function LocalPage() {
     ];
 
     return (
-        <body className={styles.body}>
+        <div className={styles.body}>
             <HamburgerMenu items={menuItems} />
             <main>
                 <div className={styles.container}>
@@ -54,6 +54,6 @@ export default function LocalPage() {
                     </button>
                 </div>
             </main>
-        </body>
+        </div>
     )
 }

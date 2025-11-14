@@ -29,7 +29,7 @@ export default function PlayPage() {
     };
 
     return (
-        <body className={styles.body}>
+        <div className={styles.body}>
             <HamburgerMenu items={menuItems} />
             <main>
                 <div className={styles.container}>
@@ -50,6 +50,6 @@ export default function PlayPage() {
                     </button>
                 </div>
             </main>
-        </body>
+        </div>
     )
 }
