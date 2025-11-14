@@ -244,3 +244,230 @@ app.patch("/api/profile/password", async (req, res) => {
         res.status(500).json({ ok: false, msg: "Error del servidor" });
     }
 });
+
+// ========================================
+//        ENDPOINTS DE LA TIENDA
+// ========================================
+
+// Obtener items de la tienda con info de si el usuario ya los compró
+app.get("/api/shop/items/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({ ok: false, msg: "userId requerido" });
+        }
+
+        // Obtener todos los items de la tienda con info de si el usuario los compró
+        const [items] = await pool.query(`
+            SELECT 
+                s.idItem,
+                s.titulo,
+                s.precio,
+                s.categoria,
+                s.clave,
+                IF(up.idCompra IS NOT NULL, 1, 0) AS comprado
+            FROM ShopItemsLT s
+            LEFT JOIN UserPurchasesLT up 
+                ON s.idItem = up.idItem 
+                AND up.idUsuario = ?
+            ORDER BY s.categoria, s.precio
+        `, [userId]);
+
+        res.json({ ok: true, items });
+    } catch (e) {
+        console.error("GET /api/shop/items", e);
+        res.status(500).json({ ok: false, msg: "Error del servidor" });
+    }
+});
+
+// Obtener balance de lodux del usuario
+app.get("/api/shop/balance/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({ ok: false, msg: "userId requerido" });
+        }
+
+        // Obtener lodux del usuario desde UserStyleLT
+        const [rows] = await pool.query(
+            "SELECT lodux FROM UserStyleLT WHERE idUsuario = ? LIMIT 1",
+            [userId]
+        );
+
+        if (rows.length === 0) {
+            // Si no existe, crear registro con lodux inicial
+            await pool.query(
+                "INSERT INTO UserStyleLT (idUsuario, lodux) VALUES (?, ?)",
+                [userId, 1000] // 1000 lodux inicial
+            );
+            return res.json({ ok: true, lodux: 1000 });
+        }
+
+        res.json({ ok: true, lodux: rows[0].lodux || 0 });
+    } catch (e) {
+        console.error("GET /api/shop/balance", e);
+        res.status(500).json({ ok: false, msg: "Error del servidor" });
+    }
+});
+
+// Comprar un item
+app.post("/api/shop/purchase", async (req, res) => {
+    const connection = await pool.getConnection();
+    
+    try {
+        const { userId, itemId } = req.body;
+
+        if (!userId || !itemId) {
+            return res.status(400).json({ ok: false, msg: "Faltan datos requeridos" });
+        }
+
+        await connection.beginTransaction();
+
+        // Verificar que el item existe y obtener su precio
+        const [itemRows] = await connection.query(
+            "SELECT precio, titulo FROM ShopItemsLT WHERE idItem = ? LIMIT 1",
+            [itemId]
+        );
+
+        if (itemRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ ok: false, msg: "Item no encontrado" });
+        }
+
+        const { precio, titulo } = itemRows[0];
+
+        // Verificar que el usuario no haya comprado ya este item
+        const [purchaseCheck] = await connection.query(
+            "SELECT idCompra FROM UserPurchasesLT WHERE idUsuario = ? AND idItem = ? LIMIT 1",
+            [userId, itemId]
+        );
+
+        if (purchaseCheck.length > 0) {
+            await connection.rollback();
+            return res.status(409).json({ ok: false, msg: "Ya tienes este item" });
+        }
+
+        // Obtener lodux actual del usuario
+        const [userRows] = await connection.query(
+            "SELECT lodux FROM UserStyleLT WHERE idUsuario = ? LIMIT 1",
+            [userId]
+        );
+
+        if (userRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ ok: false, msg: "Usuario no encontrado en UserStyleLT" });
+        }
+
+        const loduxActual = userRows[0].lodux || 0;
+
+        // Verificar que tiene suficientes lodux
+        if (loduxActual < precio) {
+            await connection.rollback();
+            return res.status(400).json({ 
+                ok: false, 
+                msg: `No tienes suficientes lodux. Necesitas ${precio - loduxActual} más` 
+            });
+        }
+
+        const nuevoSaldo = loduxActual - precio;
+
+        // Actualizar saldo
+        await connection.query(
+            "UPDATE UserStyleLT SET lodux = ? WHERE idUsuario = ?",
+            [nuevoSaldo, userId]
+        );
+
+        // Registrar la compra
+        await connection.query(
+            "INSERT INTO UserPurchasesLT (idUsuario, idItem, fecha) VALUES (?, ?, NOW())",
+            [userId, itemId]
+        );
+
+        // Registrar en el ledger de transacciones
+        await connection.query(
+            "INSERT INTO LoduxLedgerLT (tipo, monto, concepto, fecha) VALUES (?, ?, ?, NOW())",
+            ["purchase", precio, `Compra: ${titulo}`]
+        );
+
+        await connection.commit();
+
+        res.json({ 
+            ok: true, 
+            msg: "Compra exitosa", 
+            nuevoSaldo,
+            itemComprado: titulo
+        });
+
+    } catch (e) {
+        await connection.rollback();
+        console.error("POST /api/shop/purchase", e);
+        res.status(500).json({ ok: false, msg: "Error en el servidor" });
+    } finally {
+        connection.release();
+    }
+});
+
+// Dar lodux a un usuario (para admins o sistema de recompensas)
+app.post("/api/shop/grant-lodux", async (req, res) => {
+    const connection = await pool.getConnection();
+    
+    try {
+        const { userId, monto, concepto } = req.body;
+
+        if (!userId || !monto || monto <= 0) {
+            return res.status(400).json({ ok: false, msg: "Datos inválidos" });
+        }
+
+        await connection.beginTransaction();
+
+        // Verificar si el usuario existe en UserStyleLT
+        const [userRows] = await connection.query(
+            "SELECT lodux FROM UserStyleLT WHERE idUsuario = ? LIMIT 1",
+            [userId]
+        );
+
+        if (userRows.length === 0) {
+            // Si no existe, crear registro
+            await connection.query(
+                "INSERT INTO UserStyleLT (idUsuario, lodux) VALUES (?, ?)",
+                [userId, monto]
+            );
+        } else {
+            // Si existe, sumar al saldo actual
+            const nuevoSaldo = (userRows[0].lodux || 0) + monto;
+            await connection.query(
+                "UPDATE UserStyleLT SET lodux = ? WHERE idUsuario = ?",
+                [nuevoSaldo, userId]
+            );
+        }
+
+        // Registrar en el ledger
+        await connection.query(
+            "INSERT INTO LoduxLedgerLT (tipo, monto, concepto, fecha) VALUES (?, ?, ?, NOW())",
+            ["grant", monto, concepto || "Lodux otorgado"]
+        );
+
+        await connection.commit();
+
+        // Obtener nuevo saldo
+        const [newBalance] = await connection.query(
+            "SELECT lodux FROM UserStyleLT WHERE idUsuario = ? LIMIT 1",
+            [userId]
+        );
+
+        res.json({ 
+            ok: true, 
+            msg: "Lodux otorgado exitosamente",
+            nuevoSaldo: newBalance[0].lodux
+        });
+
+    } catch (e) {
+        await connection.rollback();
+        console.error("POST /api/shop/grant-lodux", e);
+        res.status(500).json({ ok: false, msg: "Error del servidor" });
+    } finally {
+        connection.release();
+    }
+});

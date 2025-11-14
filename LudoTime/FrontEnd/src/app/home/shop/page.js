@@ -1,5 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import styles from "@/app/styles/shop.module.css";
 import HamburgerMenu from "../../components/Hamburger-menu";
@@ -10,94 +11,151 @@ const CATEGORIES = [
   { key: "fichas",  label: "FICHAS",  icon: "/assets/shopItems/fichas/OverviewFichas.png" },
 ];
 
-// Items con precios - El primero de cada categoría es GRATIS (precio: 0)
-const ITEMS = {
-  fondos: [
-    { src: "/assets/fondos/f1.png", price: 0, name: "Fondo Básico" },
-    { src: "/assets/fondos/f2.png", price: 80, name: "Fondo Bosque" },
-    { src: "/assets/fondos/f3.png", price: 100, name: "Fondo Océano" },
-    { src: "/assets/fondos/f4.png", price: 120, name: "Fondo Espacio" },
-    { src: "/assets/fondos/f5.png", price: 180, name: "Fondo Galaxia" },
-    { src: "/assets/fondos/f6.png", price: 250, name: "Fondo Épico" },
-  ],
-  tablero: [
-    { src: "/assets/tablero/t1.png", price: 0, name: "Tablero Original" },
-    { src: "/assets/tablero/t2.png", price: 200, name: "Tablero Real" },
-    { src: "/assets/tablero/t3.png", price: 300, name: "Tablero Premium" },
-    { src: "/assets/tablero/t4.png", price: 500, name: "Tablero Elite" },
-  ],
-  fichas: [
-    { src: "/assets/fichas/c1.png", price: 0, name: "Fichas Clásicas" },
-    { src: "/assets/fichas/c2.png", price: 60, name: "Fichas Metal" },
-    { src: "/assets/fichas/c3.png", price: 90, name: "Fichas Neón" },
-    { src: "/assets/fichas/c4.png", price: 120, name: "Fichas Cristal" },
-    { src: "/assets/fichas/c5.png", price: 180, name: "Fichas Oro" },
-    { src: "/assets/fichas/c6.png", price: 250, name: "Fichas Legendarias" },
-  ],
-};
+// URL del API - ajusta según tu configuración
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export default function ShopPage() {
+  
   const menuItems = [
     { text: "Inicio", href: "../../home" },
     { text: "Perfil", href: "../../navhambar/profile" },
     { text: "Ayuda", href: "../../navhambar/help" },
     { text: "Configuración", href: "../../navhambar/settings" },
-    { text: "Cerrar sesión", href: "../../navhambar/log out" },
+    { text: "Cerrar sesión", href:"../../navhambar/logout" },
   ];
 
   const [active, setActive] = useState("fondos");
-  const [userLodux, setUserLodux] = useState(500); // Monedas iniciales del usuario
-  const [purchased, setPurchased] = useState(new Set(["fondos-0", "tablero-0", "fichas-0"])); // Items gratuitos ya desbloqueados
+  const [items, setItems] = useState([]);
+  const [lodux, setLodux] = useState(0);
+  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [purchaseLoading, setPurchaseLoading] = useState(null);
+  const [message, setMessage] = useState(null);
+
+  // Obtener ID del usuario desde localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        setUserId(user.id);
+      } catch (e) {
+        console.error("Error al parsear datos del usuario:", e);
+      }
+    }
+  }, []);
+
+  // Cargar items y saldo cuando tenemos el userId
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Obtener items
+        const itemsRes = await fetch(`${API_URL}/api/shop/items/${userId}`);
+        const itemsData = await itemsRes.json();
+        
+        // Obtener saldo
+        const balanceRes = await fetch(`${API_URL}/api/shop/balance/${userId}`);
+        const balanceData = await balanceRes.json();
+
+        if (itemsData.ok) setItems(itemsData.items);
+        if (balanceData.ok) setLodux(balanceData.lodux);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        showMessage("Error al cargar la tienda", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
 
   const activeLabel = useMemo(
     () => CATEGORIES.find(c => c.key === active)?.label ?? "ARTICULOS",
     [active]
   );
 
-  const items = useMemo(() => ITEMS[active] ?? [], [active]);
+  // Filtrar items por categoría activa
+  const filteredItems = useMemo(() => {
+    return items.filter(item => item.categoria === active);
+  }, [items, active]);
 
-  const handlePurchase = (itemKey, price) => {
-    if (purchased.has(itemKey)) {
-      alert("¡Ya compraste este artículo!");
+  // Función para mostrar mensajes
+  const showMessage = (text, type = "info") => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  // Función para comprar un item
+  const handlePurchase = async (itemId, precio, titulo) => {
+    if (!userId) {
+      showMessage("Debes iniciar sesión", "error");
       return;
     }
 
-    if (price === 0) {
-      setPurchased(prev => new Set([...prev, itemKey]));
-      alert("¡Artículo gratis desbloqueado!");
+    if (lodux < precio) {
+      showMessage(`No tienes suficientes lodux. Necesitas ${precio - lodux} más`, "error");
       return;
     }
 
-    if (userLodux < price) {
-      alert(`No tienes suficientes Lodux. Necesitas ${price} Lodux pero solo tienes ${userLodux}.`);
-      return;
-    }
+    setPurchaseLoading(itemId);
 
-    setUserLodux(prev => prev - price);
-    setPurchased(prev => new Set([...prev, itemKey]));
-    alert(`¡Artículo comprado por ${price} Lodux!`);
+    try {
+      const response = await fetch(`${API_URL}/api/shop/purchase`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, itemId }),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        showMessage(`¡${titulo} comprado con éxito!`, "success");
+        setLodux(data.nuevoSaldo);
+        
+        // Actualizar el estado del item como comprado
+        setItems(prevItems =>
+          prevItems.map(item =>
+            item.idItem === itemId ? { ...item, comprado: 1 } : item
+          )
+        );
+      } else {
+        showMessage(data.msg || "Error al comprar", "error");
+      }
+    } catch (error) {
+      console.error("Error en la compra:", error);
+      showMessage("Error de conexión", "error");
+    } finally {
+      setPurchaseLoading(null);
+    }
   };
 
   return (
     <main className={styles.screen}>
       <HamburgerMenu items={menuItems} />
       <div className={styles.tint} />
-      
+
       <header className={styles.topBar}>
         <h2 className={styles.topTitle}>TIENDA</h2>
+        <div className={styles.loduxCounter}>
+          <span className={styles.loduxIcon}>💰</span>
+          <span className={styles.loduxAmount}>{loading ? "..." : lodux}</span>
+          <span className={styles.loduxLabel}>Lodux</span>
+        </div>
       </header>
 
-      {/* Contador de Lodux */}
-      <div className={styles.loduxCounter}>
-        <Image 
-          src="/assets/Lodux.png" 
-          alt="Lodux" 
-          width={32} 
-          height={32}
-          className={styles.loduxIcon}
-        />
-        <span className={styles.loduxAmount}>{userLodux}</span>
-      </div>
+      {/* Mensaje de notificación */}
+      {message && (
+        <div className={`${styles.message} ${styles[message.type]}`}>
+          {message.text}
+        </div>
+      )}
 
       <section className={styles.panel}>
         <h1 className={styles.sectionTitle}>
@@ -130,58 +188,43 @@ export default function ShopPage() {
           <div className={styles.divider} />
 
           <div className={styles.stage}>
-            {items.length ? (
+            {loading ? (
+              <p className={styles.helper}>Cargando...</p>
+            ) : filteredItems.length ? (
               <ul className={styles.itemsGrid}>
-                {items.map((item, i) => {
-                  const itemKey = `${active}-${i}`;
-                  const isPurchased = purchased.has(itemKey);
-                  const isFree = item.price === 0;
-
-                  return (
-                    <li key={itemKey} className={styles.itemCard}>
-                      <div className={styles.itemImageContainer}>
-                        <Image
-                          src={item.src}
-                          alt={`${item.name}`}
-                          fill
-                          sizes="140px"
-                          className={styles.itemImg}
-                        />
+                {filteredItems.map((item) => (
+                  <li key={item.idItem} className={styles.itemCard}>
+                    <div className={styles.itemImageContainer}>
+                      {/* Aquí deberías usar la imagen real del item basada en item.clave */}
+                      <div className={styles.itemPlaceholder}>
+                        {item.titulo}
                       </div>
-                      
-                      <div className={styles.itemInfo}>
-                        <p className={styles.itemName}>{item.name}</p>
-                        {isPurchased ? (
-                          <span className={styles.ownedBadge}>✓ TUYO</span>
+                    </div>
+                    <div className={styles.itemInfo}>
+                      <h3 className={styles.itemTitle}>{item.titulo}</h3>
+                      <div className={styles.itemFooter}>
+                        <span className={styles.itemPrice}>
+                          💰 {item.precio}
+                        </span>
+                        {item.comprado ? (
+                          <span className={styles.ownedBadge}>✓ Comprado</span>
                         ) : (
                           <button
-                            onClick={() => handlePurchase(itemKey, item.price)}
-                            className={`${styles.buyButton} ${isFree ? styles.freeButton : ""}`}
+                            className={styles.buyButton}
+                            onClick={() => handlePurchase(item.idItem, item.precio, item.titulo)}
+                            disabled={purchaseLoading === item.idItem || lodux < item.precio}
                           >
-                            {isFree ? (
-                              "GRATIS"
-                            ) : (
-                              <>
-                                <Image 
-                                  src="/assets/Lodux.png" 
-                                  alt="Lodux" 
-                                  width={16} 
-                                  height={16}
-                                  className={styles.buttonLodux}
-                                />
-                                {item.price}
-                              </>
-                            )}
+                            {purchaseLoading === item.idItem ? "..." : "Comprar"}
                           </button>
                         )}
                       </div>
-                    </li>
-                  );
-                })}
+                    </div>
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className={styles.helper}>
-                Selecciona el tipo de<br />artículo en la interfaz de la<br />izquierda
+                No hay artículos disponibles en esta categoría
               </p>
             )}
           </div>
