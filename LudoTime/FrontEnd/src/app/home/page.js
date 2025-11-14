@@ -65,7 +65,10 @@ export default function Home() {
                 <h1 className={styles.title}>¡Bienvenido, {nombre || "usuario"}!</h1>
                 <button className={styles.playbtn} onClick={irAJugar}>JUGAR</button><br/>
                 <button className={styles.shopbtn} onClick={irATienda}>TIENDA</button><br/>
-                <button className={styles.scoresbtn} onClick={irAPuntajes}>PUNTAJES GLOBALES</button>
+                
+                {/* ESTO ES PORQUE NO LO HICIMOS FUNCIONAL */}
+                {/*<button className={styles.scoresbtn} onClick={irAPuntajes}>PUNTAJES GLOBALES</button>*/}
+                
             </div>
             <div className={styles.imgdiv}>
                 <Image src="/assets/classicimage.png"

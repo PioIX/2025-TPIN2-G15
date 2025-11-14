@@ -224,7 +224,7 @@ export default function LudoTimePage() {
         const position = gameState.piecePositions[playerId][pieceIndex];
         const dice = gameState.diceValue;
         
-        if (position === -1) return dice === 6;
+        if (position === -1) return dice === 6 || dice === 1;
         
         if (position >= 52) {
             const finalPos = position - 52;

@@ -220,7 +220,7 @@ export default function LudoPage() {
         const position = gameState.piecePositions[playerId][pieceIndex];
         const dice = gameState.diceValue;
 
-        if (position === -1) return dice === 6;
+        if (position === -1) return dice === 6 || dice === 1; // puede salir de la base
 
         // En el camino final: no puede pasar más allá de la meta lógica (posición 58)
         if (position >= 52) {
@@ -615,7 +615,7 @@ export default function LudoPage() {
                     <Dices size={36} />
                     {gameState.diceValue || 'Tirar'}
                 </button>
-                <button
+                {/*<button
                     onClick={winInstantly}
                     className={styles.diceButton}
                     style={{
@@ -625,7 +625,7 @@ export default function LudoPage() {
                     }}
                 >
                     🏆 Victoria instantánea (TEST)
-                </button>
+                </button>*/}
             </div>
 
             <div className={styles.rulesContainer}>

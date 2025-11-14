@@ -1030,7 +1030,7 @@ app.post("/api/shop/grant-lodux", async (req, res) => {
         connection.release();
     }
 });
-});
+
 
 // ========================================
 //        ENDPOINT DE SCORES
