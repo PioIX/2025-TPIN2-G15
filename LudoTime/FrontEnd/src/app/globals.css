@@ -40,3 +40,9 @@ a {
     color-scheme: dark;
   }
 }
+
+.momo-trust-display-regular {
+  font-family: "Momo Trust Display", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}

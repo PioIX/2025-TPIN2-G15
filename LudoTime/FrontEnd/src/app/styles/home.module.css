@@ -30,14 +30,28 @@
     align-items: center;
     margin-bottom: 20px;
     border-radius: 20px;
-    font-size: 20px;
     color: black;
     font-weight: bold;
+
+    font-family: "Momo Trust Display", sans-serif;
+    font-weight: 400;
+    font-style: bold;
+    font-size: 30px;
 }
 .title {
     margin-bottom: 20px;
     padding-top: 200px;
+
+    font-family: "Momo Trust Display", sans-serif;
+    font-weight: 400;
+    font-style: bold;
+    font-size: 60px;
 }
+
+
+
+
+
 
 .playbtn:hover, .shopbtn:hover, .scoresbtn:hover {
   background-color: #bc8ecb;

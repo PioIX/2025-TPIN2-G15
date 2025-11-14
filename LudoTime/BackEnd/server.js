@@ -244,3 +244,36 @@ app.patch("/api/profile/password", async (req, res) => {
         res.status(500).json({ ok: false, msg: "Error del servidor" });
     }
 });
+
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Método no permitido' });
+  }
+
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        u.nombre AS player,
+        p.puntaje_classic AS classic,
+        p.puntaje_time AS time,
+        p.trofeos_total AS trophies,
+        p.puntaje_total AS total,
+        p.victorias_classic,
+        p.victorias_time,
+        (p.victorias_classic + p.victorias_time) AS victorias_total
+      FROM PuntajesLT p
+      INNER JOIN UsuariosLT u ON p.idUsuario = u.idUsuarios
+      ORDER BY p.puntaje_total DESC, p.trofeos_total DESC
+      LIMIT 10
+    `);
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error('❌ Error al obtener scores:', error);
+    return res.status(500).json({ error: 'Error al obtener scores' });
+  }
+}
+
+
+

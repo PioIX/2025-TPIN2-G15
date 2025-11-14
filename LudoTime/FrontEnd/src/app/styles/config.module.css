@@ -7,7 +7,10 @@
   padding: 20px;
   background: url("../../../public/assets/bgImageLightBlue.png") center/cover no-repeat;
   position: relative;
-  font-family: 'Arial', sans-serif;
+  
+  font-family: "Momo Trust Display", sans-serif;
+
+
 }
 
 .configContainer::before {
