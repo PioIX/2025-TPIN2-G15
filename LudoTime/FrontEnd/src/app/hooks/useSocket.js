@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
 
-export function useGameSocket(userId, userName) {
+export function useGameSocket(userId, userName, onGameStart) {
     const socketRef = useRef(null);
     const [isConnected, setIsConnected] = useState(false);
     const [roomId, setRoomId] = useState(null);
@@ -59,7 +59,10 @@ export function useGameSocket(userId, userName) {
 
         socket.on('game-start', (data) => {
             console.log('🎲 Juego iniciado:', data);
-            // Redirigir a la página del juego
+            // Llamar callback para redirigir
+            if (onGameStart) {
+                onGameStart(data);
+            }
         });
 
         socket.on('error', (data) => {
