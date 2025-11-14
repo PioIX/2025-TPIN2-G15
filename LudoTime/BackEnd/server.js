@@ -3,8 +3,11 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import bcrypt from "bcryptjs";
 import { pool } from "./database/connectionMySQL.js";
+import { Server } from "socket.io";
+import { createServer } from "node:http";
 
 const app = express();
+const server = createServer(app);
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -155,9 +158,9 @@ app.get("/api/_debug/usuarioslt", async (_req, res) => {
 // ==================================================
 // Inicialización del server
 // ==================================================
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT ?? 4000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Servidor API escuchando en el puerto ${PORT} [env=${process.env.NODE_ENV}]`);
 });
 
@@ -245,6 +248,574 @@ app.patch("/api/profile/password", async (req, res) => {
     }
 });
 
+// Sección del backend que necesita corrección
+
+const io = new Server(server, {
+    cors: {
+        origin: "*", 
+        methods: ["GET", "POST"],
+        credentials: false
+    },
+    // Configuración adicional importante
+    pingTimeout: 60000, // Aumentar timeout a 60 segundos
+    pingInterval: 25000, // Ping cada 25 segundos
+    transports: ['websocket', 'polling']
+});
+
+// ========================================
+//    FUNCIONES AUXILIARES DEL JUEGO LUDO
+// ========================================
+
+const startPositions = { 0: 0, 1: 13, 2: 26, 3: 39 };
+const safeSpots = [8, 21, 34, 47];
+
+// Verificar si una pieza puede moverse
+function canMovePiece(gameState, playerId, pieceIndex) {
+    const position = gameState.piecePositions[playerId][pieceIndex];
+    const dice = gameState.diceValue;
+
+    if (position === -1) return dice === 6;
+
+    if (position >= 52) {
+        const finalPos = position - 52;
+        return finalPos + dice <= 6;
+    }
+
+    return true;
+}
+
+// Verificar si el jugador tiene movimientos válidos
+function checkValidMoves(gameState, playerId) {
+    const positions = gameState.piecePositions[playerId];
+    return positions.some((pos, idx) => canMovePiece(gameState, playerId, idx));
+}
+
+// Verificar captura de fichas
+function checkCapture(gameState, playerId, position, numPlayers) {
+    if (position < 0 || position >= 52) return null;
+    if (safeSpots.includes(position)) return null;
+    if ([0, 13, 26, 39].includes(position)) return null;
+
+    for (let pid = 0; pid < numPlayers; pid++) {
+        if (pid !== playerId) {
+            const pieceIndex = gameState.piecePositions[pid].findIndex(pos => pos === position);
+            if (pieceIndex !== -1) {
+                return {
+                    capturedPlayerId: pid,
+                    capturedPieceIndex: pieceIndex
+                };
+            }
+        }
+    }
+
+    return null;
+}
+
+// Verificar si un jugador ganó
+function checkWin(gameState, playerId) {
+    const positions = gameState.piecePositions[playerId];
+    return positions.every(pos => pos === 58);
+}
+
+// Inicializar estado del juego
+function initializeGameState(numPlayers) {
+    const piecePositions = {};
+    for (let i = 0; i < numPlayers; i++) {
+        piecePositions[i] = [-1, -1, -1, -1];
+    }
+
+    return {
+        currentPlayer: 0,
+        diceValue: null,
+        canRoll: true,
+        piecePositions,
+        consecutiveSixes: 0
+    };
+}
+
+// ========================================
+//        CONFIGURACIÓN DE SOCKET.IO
+// ========================================
+
+io.on('connection', (socket) => {
+    console.log('✅ Usuario conectado:', socket.id);
+
+    // Evento: Crear sala
+    socket.on('create-room', (data) => {
+        const { userId, userName, gameMode, maxPlayers } = data;
+        const roomId = 'room-' + Math.random().toString(36).substr(2, 9);
+
+        const room = {
+            id: roomId,
+            gameMode,
+            maxPlayers,
+            players: [{
+                socketId: socket.id,
+                userId,
+                userName,
+                isHost: true,
+                playerId: 0  // AGREGAR playerId explícito
+            }],
+            gameState: null,
+            createdAt: new Date()
+        };
+
+        room.set(roomId, room);
+        connectedUsers.set(socket.id, { 
+            userId, 
+            userName, 
+            roomId, 
+            isHost: true,
+            playerId: 0  // AGREGAR playerId
+        });
+
+        socket.join(roomId);
+        console.log(`📦 Sala creada: ${roomId} por ${userName}`);
+
+        socket.emit('room-created', {
+            roomId,
+            players: room.players
+        });
+    });
+
+    // Evento: Unirse a una sala existente - CORREGIDO
+    socket.on('join-room', (data) => {
+        const { userId, userName, roomId } = data;
+        console.log(`🔍 Intento de unirse a sala - RoomId: ${roomId}`);
+
+        const room = room.get(roomId);
+
+        if (!room) {
+            console.error(`❌ Sala no encontrada: ${roomId}`);
+            socket.emit('error', { message: 'Sala no encontrada. Verifica el código.' });
+            return;
+        }
+
+        if (room.players.length >= room.maxPlayers) {
+            console.error(`❌ Sala llena: ${roomId} (${room.players.length}/${room.maxPlayers})`);
+            socket.emit('error', { message: 'Sala llena' });
+            return;
+        }
+
+        const newPlayerId = room.players.length;  // NUEVO playerId basado en el índice
+
+        const player = {
+            socketId: socket.id,
+            userId,
+            userName,
+            isHost: false,
+            playerId: newPlayerId  // AGREGAR playerId
+        };
+
+        room.players.push(player);
+        connectedUsers.set(socket.id, { 
+            userId, 
+            userName, 
+            roomId, 
+            isHost: false,
+            playerId: newPlayerId  // AGREGAR playerId
+        });
+
+        socket.join(roomId);
+        console.log(`👤 ${userName} se unió a la sala: ${roomId} como jugador ${newPlayerId}`);
+
+        socket.emit('room-created', {
+            roomId,
+            players: room.players
+        });
+
+        io.to(roomId).emit('player-joined', {
+            players: room.players,
+            newPlayer: player
+        });
+    });
+
+    // Evento: Usuario se une al juego en curso - COMPLETAMENTE REESCRITO
+    socket.on('join-game', (data) => {
+        const { userId, userName, roomId } = data;
+        
+        console.log(`🎮 join-game recibido - roomId: ${roomId}, userId: ${userId}, socket: ${socket.id}`);
+
+        const room = room.get(roomId);
+
+        if (!room) {
+            console.error(`❌ Sala no encontrada: ${roomId}`);
+            console.log(`📋 Salas disponibles:`, Array.from(room.keys()));
+            socket.emit('error', { message: 'Sala no encontrada' });
+            return;
+        }
+
+        // IMPORTANTE: Buscar por userId, no por socketId
+        const existingPlayerIndex = room.players.findIndex(p => p.userId === userId);
+
+        if (existingPlayerIndex !== -1) {
+            // Usuario RECONECTÁNDOSE - actualizar socket
+            console.log(`♻️ Reconectando jugador existente: ${userName} (playerId: ${existingPlayerIndex})`);
+            
+            room.players[existingPlayerIndex].socketId = socket.id;
+            
+            const existingUser = connectedUsers.get(socket.id);
+            connectedUsers.set(socket.id, {
+                userId,
+                userName,
+                roomId,
+                isHost: room.players[existingPlayerIndex].isHost,
+                playerId: existingPlayerIndex
+            });
+            
+            socket.join(roomId);
+
+            // ENVIAR player-assignment INMEDIATAMENTE
+            socket.emit('player-assignment', { playerId: existingPlayerIndex });
+            console.log(`📤 player-assignment enviado: playerId=${existingPlayerIndex}`);
+
+            // Enviar estado del juego si existe
+            if (room.gameState) {
+                socket.emit('game-state-update', room.gameState);
+                console.log(`📤 game-state-update enviado`);
+            }
+
+            // Notificar reconexión
+            socket.to(roomId).emit('player-reconnected', {
+                playerId: existingPlayerIndex,
+                userName
+            });
+
+        } else {
+            // Usuario NUEVO - verificar espacio disponible
+            if (room.players.length >= room.maxPlayers) {
+                console.error(`❌ Sala llena: ${roomId} (${room.players.length}/${room.maxPlayers})`);
+                socket.emit('error', { message: 'Sala llena. No puedes unirte.' });
+                return;
+            }
+
+            const newPlayerId = room.players.length;
+            
+            console.log(`✨ Nuevo jugador uniéndose: ${userName} (playerId: ${newPlayerId})`);
+
+            const newPlayer = {
+                socketId: socket.id,
+                userId,
+                userName,
+                isHost: room.players.length === 0,
+                playerId: newPlayerId
+            };
+
+            room.players.push(newPlayer);
+            
+            connectedUsers.set(socket.id, {
+                userId,
+                userName,
+                roomId,
+                isHost: newPlayer.isHost,
+                playerId: newPlayerId
+            });
+            
+            socket.join(roomId);
+
+            console.log(`✅ Nuevo jugador agregado: ${userName} (playerId: ${newPlayerId})`);
+
+            // ENVIAR player-assignment
+            socket.emit('player-assignment', { playerId: newPlayerId });
+            console.log(`📤 player-assignment enviado: playerId=${newPlayerId}`);
+
+            // Enviar estado del juego si ya comenzó
+            if (room.gameState) {
+                socket.emit('game-state-update', room.gameState);
+            }
+
+            // Notificar a todos sobre el nuevo jugador
+            io.to(roomId).emit('player-joined', {
+                players: room.players,
+                newPlayer
+            });
+        }
+    });
+
+    // Evento: Salir de una sala
+    socket.on('leave-room', (data) => {
+        const { roomId } = data;
+        const user = connectedUsers.get(socket.id);
+        const room = room.get(roomId);
+
+        if (user && room) {
+            room.players = room.players.filter(p => p.socketId !== socket.id);
+
+            socket.leave(roomId);
+            console.log(`👋 ${user.userName} salió de la sala: ${roomId}`);
+
+            if (user.isHost && room.players.length > 0) {
+                room.players[0].isHost = true;
+                const newHostSocket = room.players[0].socketId;
+                const newHost = connectedUsers.get(newHostSocket);
+                if (newHost) newHost.isHost = true;
+            }
+
+            if (room.players.length === 0) {
+                room.delete(roomId);
+                console.log(`🗑️ Sala eliminada: ${roomId}`);
+            } else {
+                io.to(roomId).emit('player-left', {
+                    players: room.players,
+                    leftPlayer: { userId: user.userId, userName: user.userName }
+                });
+            }
+
+            connectedUsers.delete(socket.id);
+        }
+    });
+
+    // Evento: Iniciar juego - SIN CAMBIOS
+    socket.on('start-game', (data) => {
+        const { roomId } = data;
+        const room = room.get(roomId);
+        const user = connectedUsers.get(socket.id);
+
+        if (!room) {
+            socket.emit('error', { message: 'Sala no encontrada' });
+            return;
+        }
+
+        if (!user || !user.isHost) {
+            socket.emit('error', { message: 'Solo el host puede iniciar el juego' });
+            return;
+        }
+
+        if (room.players.length < 2) {
+            socket.emit('error', { message: 'Se necesitan al menos 2 jugadores' });
+            return;
+        }
+
+        console.log(`🎮 Juego iniciado en sala: ${roomId} con ${room.players.length} jugadores`);
+
+        room.gameState = initializeGameState(room.players.length);
+        room.gameStarted = true;
+
+        io.to(roomId).emit('game-start', {
+            roomId,
+            players: room.players,
+            gameState: room.gameState
+        });
+    });
+
+    // Evento: Tirar dado - MEJORADO
+    socket.on('roll-dice', (data) => {
+        const { roomId, playerId } = data;
+        const room = room.get(roomId);
+
+        console.log(`🎲 roll-dice recibido - roomId: ${roomId}, playerId: ${playerId}`);
+
+        if (!room || !room.gameState) {
+            console.error('❌ Juego no encontrado');
+            socket.emit('error', { message: 'Juego no encontrado' });
+            return;
+        }
+
+        const gameState = room.gameState;
+
+        // VERIFICACIÓN MEJORADA
+        if (gameState.currentPlayer !== playerId) {
+            console.error(`❌ No es el turno del jugador ${playerId}. Turno actual: ${gameState.currentPlayer}`);
+            socket.emit('error', { message: 'No es tu turno' });
+            return;
+        }
+
+        if (!gameState.canRoll) {
+            console.error('❌ No puede tirar el dado en este momento');
+            socket.emit('error', { message: 'No puedes tirar el dado ahora' });
+            return;
+        }
+
+        const diceValue = Math.floor(Math.random() * 6) + 1;
+        const consecutiveSixes = diceValue === 6 ? gameState.consecutiveSixes + 1 : 0;
+
+        console.log(`🎲 Dado: ${diceValue}, Seises consecutivos: ${consecutiveSixes}`);
+
+        if (consecutiveSixes === 3) {
+            console.log('⚠️ Tres seises consecutivos - saltar turno');
+            gameState.consecutiveSixes = 0;
+            gameState.canRoll = false;
+
+            io.to(roomId).emit('dice-rolled', { value: diceValue, consecutiveSixes: 3 });
+
+            setTimeout(() => {
+                gameState.currentPlayer = (gameState.currentPlayer + 1) % room.players.length;
+                gameState.canRoll = true;
+                gameState.diceValue = null;
+
+                console.log(`🔄 Turno cambiado a jugador ${gameState.currentPlayer}`);
+                io.to(roomId).emit('turn-changed', { currentPlayer: gameState.currentPlayer });
+            }, 1500);
+
+            return;
+        }
+
+        gameState.diceValue = diceValue;
+        gameState.consecutiveSixes = consecutiveSixes;
+        gameState.canRoll = false;
+
+        io.to(roomId).emit('dice-rolled', { value: diceValue, consecutiveSixes });
+
+        const hasValidMoves = checkValidMoves(gameState, playerId);
+
+        if (!hasValidMoves) {
+            console.log(`⏭️ Jugador ${playerId} no tiene movimientos válidos`);
+            setTimeout(() => {
+                gameState.currentPlayer = (gameState.currentPlayer + 1) % room.players.length;
+                gameState.canRoll = true;
+                gameState.diceValue = null;
+                gameState.consecutiveSixes = 0;
+
+                console.log(`🔄 Turno cambiado a jugador ${gameState.currentPlayer}`);
+                io.to(roomId).emit('turn-changed', { currentPlayer: gameState.currentPlayer });
+            }, 1500);
+        }
+    });
+
+    // Evento: Mover pieza - SIN CAMBIOS MAYORES
+    socket.on('move-piece', (data) => {
+        const { roomId, playerId, pieceIndex, from, to, steps } = data;
+        const room = room.get(roomId);
+
+        if (!room || !room.gameState) {
+            socket.emit('error', { message: 'Juego no encontrado' });
+            return;
+        }
+
+        const gameState = room.gameState;
+
+        if (gameState.currentPlayer !== playerId) {
+            socket.emit('error', { message: 'No es tu turno' });
+            return;
+        }
+
+        console.log(`♟️ Moviendo pieza: jugador ${playerId}, pieza ${pieceIndex}, de ${from} a ${to}`);
+
+        gameState.piecePositions[playerId][pieceIndex] = to;
+
+        io.to(roomId).emit('piece-moved', { playerId, pieceIndex, from, to, steps });
+
+        const captured = checkCapture(gameState, playerId, to, room.players.length);
+
+        if (captured) {
+            const { capturedPlayerId, capturedPieceIndex } = captured;
+            console.log(`💥 Captura: jugador ${capturedPlayerId}, pieza ${capturedPieceIndex}`);
+            gameState.piecePositions[capturedPlayerId][capturedPieceIndex] = -1;
+
+            io.to(roomId).emit('piece-captured', { capturedPlayerId, capturedPieceIndex });
+        }
+
+        const hasWon = checkWin(gameState, playerId);
+
+        if (hasWon) {
+            const winner = room.players[playerId];
+            console.log(`🏆 Jugador ${playerId} (${winner.userName}) ha ganado!`);
+            io.to(roomId).emit('game-ended', {
+                winner: winner.userName,
+                winnerId: playerId
+            });
+
+            setTimeout(() => {
+                room.delete(roomId);
+            }, 5000);
+
+            return;
+        }
+
+        const shouldContinue = gameState.diceValue === 6 || captured;
+
+        if (shouldContinue) {
+            console.log(`♻️ Jugador ${playerId} tira de nuevo (dado=6 o captura)`);
+            gameState.canRoll = true;
+            gameState.diceValue = null;
+        } else {
+            setTimeout(() => {
+                gameState.currentPlayer = (gameState.currentPlayer + 1) % room.players.length;
+                gameState.canRoll = true;
+                gameState.diceValue = null;
+                gameState.consecutiveSixes = 0;
+
+                console.log(`🔄 Turno cambiado a jugador ${gameState.currentPlayer}`);
+                io.to(roomId).emit('turn-changed', { currentPlayer: gameState.currentPlayer });
+            }, 500);
+        }
+    });
+
+    // Evento: Saltar turno - SIN CAMBIOS
+    socket.on('skip-turn', (data) => {
+        const { roomId, playerId } = data;
+        const room = room.get(roomId);
+
+        if (!room || !room.gameState) {
+            return;
+        }
+
+        const gameState = room.gameState;
+
+        if (gameState.currentPlayer !== playerId) {
+            return;
+        }
+
+        console.log(`⏭️ Jugador ${playerId} salta su turno`);
+
+        gameState.currentPlayer = (gameState.currentPlayer + 1) % room.players.length;
+        gameState.canRoll = true;
+        gameState.diceValue = null;
+        gameState.consecutiveSixes = 0;
+
+        io.to(roomId).emit('turn-changed', { currentPlayer: gameState.currentPlayer });
+    });
+
+    // Evento: Abandonar juego
+    socket.on('leave-game', (data) => {
+        const { roomId } = data;
+        const user = connectedUsers.get(socket.id);
+        const room = room.get(roomId);
+
+        if (user && room) {
+            socket.leave(roomId);
+            console.log(`🚪 ${user.userName} salió del juego: ${roomId}`);
+
+            socket.to(roomId).emit('player-disconnected', {
+                playerName: user.userName
+            });
+        }
+    });
+
+    // Evento: Desconexión - MEJORADO
+    socket.on('disconnect', (reason) => {
+        const user = connectedUsers.get(socket.id);
+
+        if (user) {
+            console.log(`❌ Usuario desconectado: ${user.userName} (razón: ${reason})`);
+
+            if (user.roomId) {
+                const room = room.get(user.roomId);
+                
+                // NO eliminar al jugador inmediatamente - permitir reconexión
+                if (room) {
+                    socket.to(user.roomId).emit('player-disconnected', {
+                        playerId: user.playerId,
+                        playerName: user.userName,
+                        temporary: true  // Indicar que puede reconectarse
+                    });
+                }
+            }
+
+            connectedUsers.delete(socket.id);
+        } else {
+            console.log(`❌ Socket desconectado: ${socket.id} (sin usuario asociado)`);
+        }
+    });
+
+    // Manejo de errores del socket
+    socket.on('error', (error) => {
+        console.error('❌ Socket error:', error);
+    });
+
+});
+
+
 // ========================================
 //        ENDPOINTS DE LA TIENDA
 // ========================================
@@ -260,7 +831,7 @@ app.get("/api/shop/items/:userId", async (req, res) => {
 
         // Obtener todos los items de la tienda con info de si el usuario los compró
         const [items] = await pool.query(`
-            SELECT 
+            SELECT
                 s.idItem,
                 s.titulo,
                 s.precio,
@@ -268,8 +839,8 @@ app.get("/api/shop/items/:userId", async (req, res) => {
                 s.clave,
                 IF(up.idCompra IS NOT NULL, 1, 0) AS comprado
             FROM ShopItemsLT s
-            LEFT JOIN UserPurchasesLT up 
-                ON s.idItem = up.idItem 
+            LEFT JOIN UserPurchasesLT up
+                ON s.idItem = up.idItem
                 AND up.idUsuario = ?
             ORDER BY s.categoria, s.precio
         `, [userId]);
@@ -459,3 +1030,39 @@ app.post("/api/shop/grant-lodux", async (req, res) => {
         connection.release();
     }
 });
+});
+
+// ========================================
+//        ENDPOINT DE SCORES
+// ========================================
+
+export default async function handler(req, res) {
+    if (req.method !== 'GET') {
+        return res.status(405).json({ error: 'Método no permitido' });
+    }
+
+    try {
+        const [rows] = await pool.query(`
+    SELECT
+        u.nombre AS player,
+        p.puntaje_classic AS classic,
+        p.puntaje_time AS time,
+        p.trofeos_total AS trophies,
+        p.puntaje_total AS total,
+        p.victorias_classic,
+        p.victorias_time,
+        (p.victorias_classic + p.victorias_time) AS victorias_total
+        FROM PuntajesLT p
+        INNER JOIN UsuariosLT u ON p.idUsuario = u.idUsuarios
+        ORDER BY p.puntaje_total DESC, p.trofeos_total DESC
+        LIMIT 10
+    `);
+
+        return res.status(200).json(rows);
+    } catch (error) {
+        console.error('❌ Error al obtener scores:', error);
+        return res.status(500).json({ error: 'Error al obtener scores' });
+    }
+}
+
+

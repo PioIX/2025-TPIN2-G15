@@ -10,13 +10,12 @@ export default function LocalPage() {
     const menuItems = [
         { text: "Inicio", href: "../../../home" },
         { text: "Perfil", href: "../../../navhambar/profile" },
-        { text: "Ayuda", href: "../../../navhambar/help" },
-        { text: "Configuración", href: "../../../navhambar/settings" },
-        { text: "Cerrar sesión", href: "../../../navhambar/log out" },
+        { text: "Reglas", href: "../../../navhambar/rules" },
+        { text: "Cerrar sesión", href: "../../../navhambar/logout" },
     ];
 
     return (
-        <body className={styles.body}>
+        <div className={styles.body}>
             <HamburgerMenu items={menuItems} />
             <main>
                 <div className={styles.container}>
@@ -43,6 +42,6 @@ export default function LocalPage() {
                     </button>
                 </div>
             </main>
-        </body>
+        </div>
     )
 }

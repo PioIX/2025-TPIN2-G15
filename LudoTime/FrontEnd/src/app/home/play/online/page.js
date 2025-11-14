@@ -15,6 +15,11 @@ export default function OnlinePage() {
         { text: "Cerrar sesión", href:"../../../navhambar/log out" },
     ];
 
+
+    const irAClassic = () => {
+        router.push("/home/play/online/classic");
+    }
+
     /* 
     const irALocal = () => {
         router.push("/home/play/local");
@@ -30,11 +35,11 @@ export default function OnlinePage() {
     */
 
     return (
-        <body className={styles.body}>
+        <div className={styles.body}>
             <HamburgerMenu items={menuItems} />
             <main>
                 <div className={styles.container}>
-                    <button className={`${styles.card} ${styles.classicbtn}`} /*onClick={}*/>
+                    <button className={`${styles.card} ${styles.classicbtn}`} onClick={irAClassic}/*onClick={}*/>
                         <div className={styles.overlay}></div> {/* NO BORRAR SIRVE PARA DIFUMINAR EL BOTON*/}
                         <div className={styles.content}>
                             <span className={styles.title}>CLASSIC</span>
@@ -52,6 +57,6 @@ export default function OnlinePage() {
                     </button>
                 </div>
             </main>
-        </body>
+        </div>
     )
 }

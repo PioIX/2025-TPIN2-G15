@@ -1,0 +1,240 @@
+/* ===========================
+   Fondo y layout base
+   =========================== */
+.screen {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.bg {
+    position: fixed;
+    inset: 0;
+    filter: blur(6px);
+    transform: scale(1.05);
+    z-index: -2;
+    background-image: url('/assets/mainBgImagent.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.tint {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .6);
+    z-index: -1;
+}
+
+/* ===========================
+   Tarjeta principal
+   =========================== */
+.card {
+    background: rgba(0, 0, 0, .85);
+    border-radius: 24px;
+    padding: 48px 32px;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+    animation: slideIn 0.4s ease-out;
+    margin: 2rem auto;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Logo */
+.logoHolder {
+    position: relative;
+    width: 350px;
+    height: 70px;
+    margin: 0 auto 32px;
+}
+
+.logoImg {
+    object-fit: contain;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .6));
+}
+
+/* ===========================
+   Contenido
+   =========================== */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.title {
+    color: #f2b61d;
+    font-weight: 900;
+    font-size: clamp(32px, 5vw, 42px);
+    letter-spacing: .12em;
+    margin: 0;
+    text-transform: uppercase;
+    text-align: center;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, .4);
+}
+
+/* ===========================
+   Contenedor de reglas
+   =========================== */
+.rulesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 12px;
+    margin: 12px 0;
+}
+
+/* Scrollbar personalizado */
+.rulesContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rulesContainer::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.rulesContainer::-webkit-scrollbar-thumb {
+    background: #f2b61d;
+    border-radius: 10px;
+}
+
+.rulesContainer::-webkit-scrollbar-thumb:hover {
+    background: #d9a419;
+}
+
+/* ===========================
+   Secciones de reglas
+   =========================== */
+.ruleSection {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid #f2b61d;
+    border-radius: 12px;
+    padding: 20px 24px;
+    transition: all 0.3s ease;
+}
+
+.ruleSection:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+}
+
+.sectionTitle {
+    color: #f2b61d;
+    font-weight: 800;
+    font-size: clamp(20px, 3vw, 24px);
+    letter-spacing: .08em;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+}
+
+.ruleText {
+    color: #e5e7eb;
+    font-size: clamp(15px, 2vw, 18px);
+    font-weight: 500;
+    letter-spacing: .04em;
+    margin: 8px 0;
+    line-height: 1.6;
+}
+
+.ruleText strong {
+    color: #f2b61d;
+    font-weight: 700;
+}
+
+/* ===========================
+   Botón de volver
+   =========================== */
+.backBtn {
+    padding: 16px 48px;
+    border: 0;
+    border-radius: 9999px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: lowercase;
+    cursor: pointer;
+    font-size: clamp(18px, 2.5vw, 22px);
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, .3);
+    background: linear-gradient(135deg, #f2b61d 0%, #d9a419 100%);
+    color: #1a1a1a;
+    margin-top: 12px;
+    align-self: center;
+}
+
+.backBtn:hover {
+    background: linear-gradient(135deg, #d9a419 0%, #c09315 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, .3);
+}
+
+.backBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, .3);
+}
+
+/* ===========================
+   Responsive
+   =========================== */
+@media (max-width: 720px) {
+    .card {
+        padding: 32px 20px;
+        margin: 1rem auto;
+    }
+
+    .logoHolder {
+        width: 240px;
+        height: 48px;
+        margin-bottom: 24px;
+    }
+
+    .rulesContainer {
+        max-height: 50vh;
+        padding-right: 8px;
+    }
+
+    .ruleSection {
+        padding: 16px 18px;
+    }
+
+    .sectionTitle {
+        margin-bottom: 8px;
+    }
+
+    .ruleText {
+        margin: 6px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .screen {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 24px 16px;
+    }
+
+    .logoHolder {
+        width: 200px;
+        height: 40px;
+    }
+}

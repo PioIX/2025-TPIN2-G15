@@ -11,9 +11,8 @@ export default function PlayPage() {
     const menuItems = [
         { text: "Inicio", href: "../../home" },
         { text: "Perfil", href: "../../navhambar/profile" },
-        { text: "Ayuda", href: "../../navhambar/help" },
-        { text: "Configuración", href: "../../navhambar/settings" },
-        { text: "Cerrar sesión", href:"../../navhambar/log out" },
+        { text: "Reglas", href: "../../navhambar/rules" },
+        { text: "Cerrar sesión", href:"../../navhambar/logout" },
     ];
 
     const irALocal = () => {
@@ -29,7 +28,7 @@ export default function PlayPage() {
     };
 
     return (
-        <body className={styles.body}>
+        <div className={styles.body}>
             <HamburgerMenu items={menuItems} />
             <main>
                 <div className={styles.container}>
@@ -50,6 +49,6 @@ export default function PlayPage() {
                     </button>
                 </div>
             </main>
-        </body>
+        </div>
     )
 }
