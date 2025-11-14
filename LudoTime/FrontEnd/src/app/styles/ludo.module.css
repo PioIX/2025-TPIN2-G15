@@ -535,7 +535,25 @@
   margin-bottom: 1rem;
 }
 
-
+.skipButton:hover {
+    opacity: 1;
+    background-color: #555;
+    font-size: 25px;
+    padding: 1.2rem;
+}
+.skipButton {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #6582a7;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: all 0.3s;
+  font-size: 23px;
+}
 
 
 

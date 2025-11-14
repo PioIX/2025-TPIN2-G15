@@ -87,6 +87,66 @@ export default function LudoTimePage() {
         return CARD_TYPES[Math.floor(Math.random() * CARD_TYPES.length)];
     };
 
+    // ========= NUEVO: calcula el recorrido completo de una jugada =========
+    const getMovementPath = (playerId, startPos, dice) => {
+        const path = [];
+
+        // Desde la base (-1) sale a su casilla de salida
+        if (startPos === -1) {
+            const firstPos = startPositions[playerId];
+            path.push(firstPos);
+            return path;
+        }
+
+        // Ya está en el camino final (52–57)
+        if (startPos >= 52) {
+            let current = startPos;
+            for (let step = 1; step <= dice; step++) {
+                let next = current + 1;
+                if (next > 57) {
+                    // Llega/pasa la última casilla -> meta (58)
+                    next = 58;
+                    path.push(next);
+                    break;
+                }
+                path.push(next);
+                current = next;
+            }
+            return path;
+        }
+
+        // Está en el camino principal (0–51)
+        const startPosPlayer = startPositions[playerId];
+        const entryPos = (startPosPlayer + 51) % 52; // casilla justo antes de la salida de ese color
+
+        let current = startPos;
+
+        for (let step = 1; step <= dice; step++) {
+            // Si estoy parado en la casilla de entrada al home, entro al camino final
+            if (current === entryPos) {
+                const stepsIntoFinal = dice - step + 1; // incluye este paso
+                let currentFinal = 52;
+
+                for (let i = 0; i < stepsIntoFinal; i++) {
+                    if (currentFinal > 57) {
+                        path.push(58);
+                        return path;
+                    }
+                    path.push(currentFinal);
+                    currentFinal++;
+                }
+                return path;
+            }
+
+            // Movimiento normal por el anillo
+            current = (current + 1) % 52;
+            path.push(current);
+        }
+
+        // Nunca entró al home en esta tirada, se queda en el anillo
+        return path;
+    };
+
     const useCard = (targetPlayerId) => {
         const card = gameState.playerCards[gameState.currentPlayer];
         if (!card) return;
@@ -199,64 +259,13 @@ export default function LudoTimePage() {
         
         setGameState(prev => ({ ...prev, canRoll: false }));
         
-        let newPos;
-        if (currentPos === -1) {
-            // Salir de la base
-            newPos = startPositions[playerId];
-            await animateMovement(playerId, pieceIndex, currentPos, newPos, 1);
-        } else if (currentPos >= 52) {
-            // Ya está en el camino final
-            newPos = currentPos + dice;
-            if (newPos > 57) {
-                newPos = 58;
-            }
-            await animateMovement(playerId, pieceIndex, currentPos, newPos, dice);
-        } else {
-            // Está en el camino principal (0-51)
-            const startPos = startPositions[playerId];
-            const entryPos = (startPos + 51) % 52; // Posición de entrada al camino final
-            
-            let stepsRemaining = dice;
-            let tempPos = currentPos;
-            let shouldEnterFinal = false;
-            
-            // Simular el movimiento paso a paso
-            for (let step = 1; step <= dice; step++) {
-                let nextPos = (tempPos + 1) % 52;
-                
-                // Verificar si pasamos por la entrada al camino final
-                if (tempPos < entryPos && nextPos >= entryPos && tempPos >= startPos) {
-                    shouldEnterFinal = true;
-                    stepsRemaining = dice - step;
-                    break;
-                }
-                // Verificar si damos la vuelta completa y pasamos por la entrada
-                if (tempPos >= startPos && nextPos < startPos) {
-                    // Dimos la vuelta, verificar si llegamos a la entrada
-                    let stepsToEntry = (52 - tempPos) + entryPos;
-                    if (step + stepsToEntry <= dice) {
-                        shouldEnterFinal = true;
-                        stepsRemaining = dice - step - stepsToEntry;
-                        break;
-                    }
-                }
-                
-                tempPos = nextPos;
-            }
-            
-            if (shouldEnterFinal) {
-                // Entrar al camino final
-                newPos = 52 + stepsRemaining;
-                if (newPos > 57) {
-                    newPos = 58;
-                }
-            } else {
-                // Continuar en el camino principal
-                newPos = (currentPos + dice) % 52;
-            }
-            
-            await animateMovement(playerId, pieceIndex, currentPos, newPos, dice);
-        }
+        // NUEVO: calculamos el recorrido completo y animamos en base a eso
+        const movementPath = getMovementPath(playerId, currentPos, dice);
+        const newPos = movementPath.length > 0
+            ? movementPath[movementPath.length - 1]
+            : currentPos;
+
+        await animateMovement(playerId, pieceIndex, movementPath);
         
         const newPositions = { ...gameState.piecePositions };
         newPositions[playerId] = [...newPositions[playerId]];
@@ -282,12 +291,10 @@ export default function LudoTimePage() {
         }
         
         // Verificar si cayó en casilla de carta
-        let gotCard = false;
         if (newPos < 52 && cardSpots.includes(newPos)) {
             const newCard = getRandomCard();
             const newCards = [...gameState.playerCards];
             newCards[playerId] = newCard;
-            gotCard = true;
             
             setGameState(prev => ({
                 ...prev,
@@ -322,41 +329,17 @@ export default function LudoTimePage() {
         }
     };
     
-    const animateMovement = async (playerId, pieceIndex, startPos, endPos, steps) => {
+    // ========= NUEVO: anima siguiendo una lista de posiciones =========
+    const animateMovement = async (playerId, pieceIndex, path) => {
         const delay = 200;
-        
-        if (startPos === -1) {
+        if (!path || path.length === 0) return;
+
+        for (let stepPos of path) {
             setGameState(prev => {
                 const newPositions = { ...prev.piecePositions };
                 newPositions[playerId] = [...newPositions[playerId]];
-                newPositions[playerId][pieceIndex] = endPos;
-                return {
-                    ...prev,
-                    piecePositions: newPositions,
-                    animatingPieces: { [`${playerId}-${pieceIndex}`]: true }
-                };
-            });
-            await sleep(delay);
-            return;
-        }
-        
-        for (let step = 1; step <= steps; step++) {
-            let currentStepPos;
-            
-            if (startPos >= 52) {
-                currentStepPos = startPos + step;
-            } else {
-                currentStepPos = (startPos + step) % 52;
-                
-                if (endPos >= 52 && currentStepPos === 0) {
-                    currentStepPos = 52 + (step - (52 - startPos));
-                }
-            }
-            
-            setGameState(prev => {
-                const newPositions = { ...prev.piecePositions };
-                newPositions[playerId] = [...newPositions[playerId]];
-                newPositions[playerId][pieceIndex] = currentStepPos;
+                newPositions[playerId][pieceIndex] = stepPos;
+
                 return {
                     ...prev,
                     piecePositions: newPositions,
@@ -365,6 +348,8 @@ export default function LudoTimePage() {
             });
             await sleep(delay);
         }
+        // OJO: no limpiamos animatingPieces acá a propósito,
+        // movePiece ya hace `animatingPieces: {}` como antes.
     };
     
     const animateCapture = async (playerId, pieceIndex) => {
@@ -516,45 +501,53 @@ export default function LudoTimePage() {
                 }
 
                 mainPath.forEach((pos, idx) => {
-                    if (pos.x === x && pos.y === y) {
-                        if (!content && cardSpots.includes(idx)) {
-                            content = <div className={styles.cardIcon} style={{color: "rgba(37, 37, 37, 0.295)"}}><Zap size={20} /></div>;
-                        }
-
-                        Object.keys(gameState.piecePositions).forEach(playerId => {
-                            const pid = parseInt(playerId);
-                            if (pid < numPlayers) {
-                                gameState.piecePositions[playerId].forEach((piecePos, pieceIdx) => {
-                                    if (piecePos === idx) {
-                                        const pieceColorClass = [
-                                            styles.pieceGreen,
-                                            styles.pieceYellow,
-                                            styles.pieceBlue,
-                                            styles.pieceRed
-                                        ][playerId];
-
-                                        const canMove = gameState.currentPlayer == playerId && 
-                                                       canMovePiece(playerId, pieceIdx) && 
-                                                       gameState.diceValue !== null;
-                                        const sizeClass = canMove ? styles.pieceLarge : styles.pieceMedium;
-
-                                        const isAnimating = gameState.animatingPieces[`${playerId}-${pieceIdx}`];
-                                        const isCaptured = gameState.capturedPieces[`${playerId}-${pieceIdx}`];
-                                        const animClass = isCaptured ? styles.pieceCaptured : (isAnimating ? styles.pieceMoving : '');
-
-                                        content = (
-                                            <div
-                                                onClick={() => canMove && movePiece(pieceIdx)}
-                                                className={`${styles.piece} ${sizeClass} ${pieceColorClass} ${animClass}`}
-                                                style={{ cursor: canMove ? 'pointer' : 'default' }}
-                                            ></div>
-                                        );
-                                    }
-                                });
-                            }
-                        });
+                  if (pos.x === x && pos.y === y) {
+                    if (!content && cardSpots.includes(idx)) {
+                        content = <div className={styles.cardIcon} style={{color: "rgba(37, 37, 37, 0.295)"}}><Zap size={20} /></div>;
                     }
+                
+                    Object.keys(gameState.piecePositions).forEach(playerId => {
+                      const pid = parseInt(playerId);
+                      if (pid < numPlayers) {
+                        gameState.piecePositions[playerId].forEach((piecePos, pieceIdx) => {
+                          if (piecePos === idx) {
+                            const pieceColorClass = [
+                              styles.pieceGreen,
+                              styles.pieceYellow,
+                              styles.pieceBlue,
+                              styles.pieceRed
+                            ][playerId];
+                        
+                            const canMove = gameState.currentPlayer == playerId &&
+                              canMovePiece(playerId, pieceIdx) &&
+                              gameState.diceValue !== null;
+                            const sizeClass = canMove ? styles.pieceLarge : styles.pieceMedium;
+                        
+                            // ...
+                            const isAnimating = gameState.animatingPieces[`${playerId}-${pieceIdx}`];
+                            const isCaptured = gameState.capturedPieces[`${playerId}-${pieceIdx}`];
+                            const animClass = isCaptured ? styles.pieceCaptured : (isAnimating ? styles.pieceMoving : '');
+
+                            // 👇 CAMBIO ACÁ
+                            const isCurrentPlayer = gameState.currentPlayer == playerId;
+
+                            if (!content || isCurrentPlayer) {
+                              content = (
+                                <div
+                                  onClick={() => canMove && movePiece(pieceIdx)}
+                                  className={`${styles.piece} ${sizeClass} ${pieceColorClass} ${animClass}`}
+                                  style={{ cursor: canMove ? 'pointer' : 'default' }}
+                                ></div>
+                              );
+                            }
+
+                          }
+                        });
+                      }
+                    });
+                  }
                 });
+
 
                 Object.keys(finalPaths).forEach(playerId => {
                     const pid = parseInt(playerId);
@@ -656,8 +649,7 @@ export default function LudoTimePage() {
                         </div>
                     )}
                     {numPlayers >= 4 && (
-                        <div className={`${styles.playerIndicator} ${gameState.currentPlayer === 3 ? styles.active : ''}
-                    ${gameState.blockedPlayers[3] ? styles.blocked : ''}`}
+                        <div className={`${styles.playerIndicator} ${gameState.currentPlayer === 3 ? styles.active : ''} ${gameState.blockedPlayers[3] ? styles.blocked : ''}`}
                              style={{ borderColor: gameState.currentPlayer === 3 ? '#990906' : 'transparent' }}>
                             <div className={`${styles.playerColorDot} ${styles.red}`}></div>
                             <div className={styles.playerName}>Jugador 4</div>
@@ -733,6 +725,16 @@ export default function LudoTimePage() {
                 <p className={styles.rulesText}>• Jugadores: {numPlayers}</p>
             </div>
             
+            {/* Boton de skip turno por si algo sale mal */}
+            <div style={{ marginTop: "20px", textAlign: "center" }}>
+                <button
+                    onClick={nextTurn}
+                    className={styles.skipButton}
+                >
+                    ⏭️ Saltar turno
+                </button>
+            </div>
+
             {/* Notificación de carta obtenida */}
             {gameState.pendingCard && (
                 <div className={styles.cardNotification}>
