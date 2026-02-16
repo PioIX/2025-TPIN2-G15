@@ -252,7 +252,7 @@ app.patch("/api/profile/password", async (req, res) => {
 
 const io = new Server(server, {
     cors: {
-        origin: "*", 
+        origin: "*",
         methods: ["GET", "POST"],
         credentials: false
     },
@@ -361,10 +361,10 @@ io.on('connection', (socket) => {
         };
 
         room.set(roomId, room);
-        connectedUsers.set(socket.id, { 
-            userId, 
-            userName, 
-            roomId, 
+        connectedUsers.set(socket.id, {
+            userId,
+            userName,
+            roomId,
             isHost: true,
             playerId: 0  // AGREGAR playerId
         });
@@ -408,10 +408,10 @@ io.on('connection', (socket) => {
         };
 
         room.players.push(player);
-        connectedUsers.set(socket.id, { 
-            userId, 
-            userName, 
-            roomId, 
+        connectedUsers.set(socket.id, {
+            userId,
+            userName,
+            roomId,
             isHost: false,
             playerId: newPlayerId  // AGREGAR playerId
         });
@@ -433,7 +433,7 @@ io.on('connection', (socket) => {
     // Evento: Usuario se une al juego en curso - COMPLETAMENTE REESCRITO
     socket.on('join-game', (data) => {
         const { userId, userName, roomId } = data;
-        
+
         console.log(`🎮 join-game recibido - roomId: ${roomId}, userId: ${userId}, socket: ${socket.id}`);
 
         const room = room.get(roomId);
@@ -451,9 +451,9 @@ io.on('connection', (socket) => {
         if (existingPlayerIndex !== -1) {
             // Usuario RECONECTÁNDOSE - actualizar socket
             console.log(`♻️ Reconectando jugador existente: ${userName} (playerId: ${existingPlayerIndex})`);
-            
+
             room.players[existingPlayerIndex].socketId = socket.id;
-            
+
             const existingUser = connectedUsers.get(socket.id);
             connectedUsers.set(socket.id, {
                 userId,
@@ -462,7 +462,7 @@ io.on('connection', (socket) => {
                 isHost: room.players[existingPlayerIndex].isHost,
                 playerId: existingPlayerIndex
             });
-            
+
             socket.join(roomId);
 
             // ENVIAR player-assignment INMEDIATAMENTE
@@ -490,7 +490,7 @@ io.on('connection', (socket) => {
             }
 
             const newPlayerId = room.players.length;
-            
+
             console.log(`✨ Nuevo jugador uniéndose: ${userName} (playerId: ${newPlayerId})`);
 
             const newPlayer = {
@@ -502,7 +502,7 @@ io.on('connection', (socket) => {
             };
 
             room.players.push(newPlayer);
-            
+
             connectedUsers.set(socket.id, {
                 userId,
                 userName,
@@ -510,7 +510,7 @@ io.on('connection', (socket) => {
                 isHost: newPlayer.isHost,
                 playerId: newPlayerId
             });
-            
+
             socket.join(roomId);
 
             console.log(`✅ Nuevo jugador agregado: ${userName} (playerId: ${newPlayerId})`);
@@ -791,7 +791,7 @@ io.on('connection', (socket) => {
 
             if (user.roomId) {
                 const room = room.get(user.roomId);
-                
+
                 // NO eliminar al jugador inmediatamente - permitir reconexión
                 if (room) {
                     socket.to(user.roomId).emit('player-disconnected', {
@@ -825,32 +825,25 @@ app.get("/api/shop/items/:userId", async (req, res) => {
     try {
         const { userId } = req.params;
 
-        if (!userId) {
-            return res.status(400).json({ ok: false, msg: "userId requerido" });
-        }
-
-        // Obtener todos los items de la tienda con info de si el usuario los compró
         const [items] = await pool.query(`
-            SELECT
-                s.idItem,
-                s.titulo,
-                s.precio,
-                s.categoria,
-                s.clave,
-                IF(up.idCompra IS NOT NULL, 1, 0) AS comprado
-            FROM ShopItemsLT s
-            LEFT JOIN UserPurchasesLT up
-                ON s.idItem = up.idItem
-                AND up.idUsuario = ?
-            ORDER BY s.categoria, s.precio
-        `, [userId]);
+    SELECT 
+        si.*,
+        CASE WHEN up.idItem IS NOT NULL THEN 1 ELSE 0 END AS comprado,
+        IFNULL(up.isEquipped, 0) AS equipped
+    FROM ShopItemsLT si
+    LEFT JOIN UserPurchasesLT up
+        ON si.idItem = up.idItem
+        AND up.idUsuario = ?
+    `, [userId]);
 
         res.json({ ok: true, items });
-    } catch (e) {
-        console.error("GET /api/shop/items", e);
-        res.status(500).json({ ok: false, msg: "Error del servidor" });
+
+    } catch (err) {
+        console.error("Error cargando tienda:", err);
+        res.status(500).json({ ok: false });
     }
 });
+
 
 // Obtener balance de lodux del usuario
 app.get("/api/shop/balance/:userId", async (req, res) => {
@@ -886,7 +879,7 @@ app.get("/api/shop/balance/:userId", async (req, res) => {
 // Comprar un item
 app.post("/api/shop/purchase", async (req, res) => {
     const connection = await pool.getConnection();
-    
+
     try {
         const { userId, itemId } = req.body;
 
@@ -936,9 +929,9 @@ app.post("/api/shop/purchase", async (req, res) => {
         // Verificar que tiene suficientes lodux
         if (loduxActual < precio) {
             await connection.rollback();
-            return res.status(400).json({ 
-                ok: false, 
-                msg: `No tienes suficientes lodux. Necesitas ${precio - loduxActual} más` 
+            return res.status(400).json({
+                ok: false,
+                msg: `No tienes suficientes lodux. Necesitas ${precio - loduxActual} más`
             });
         }
 
@@ -958,9 +951,9 @@ app.post("/api/shop/purchase", async (req, res) => {
 
         await connection.commit();
 
-        res.json({ 
-            ok: true, 
-            msg: "Compra exitosa", 
+        res.json({
+            ok: true,
+            msg: "Compra exitosa",
             nuevoSaldo,
             itemComprado: titulo
         });
@@ -974,10 +967,69 @@ app.post("/api/shop/purchase", async (req, res) => {
     }
 });
 
+app.patch("/api/shop/equip", async (req, res) => {
+    try {
+        const { userId, itemId } = req.body;
+
+        const [owned] = await pool.query(
+            "SELECT * FROM UserPurchasesLT WHERE idUsuario = ? AND idItem = ?",
+            [userId, itemId]
+        );
+
+        if (!owned.length) {
+            return res.status(403).json({ ok: false });
+        }
+
+        const [item] = await pool.query(
+            "SELECT categoria FROM ShopItemsLT WHERE idItem = ?",
+            [itemId]
+        );
+
+        const categoria = item[0].categoria;
+
+        await pool.query(`
+      UPDATE UserPurchasesLT up
+      JOIN ShopItemsLT si ON up.idItem = si.idItem
+      SET up.isEquipped = 0
+      WHERE up.idUsuario = ? AND si.categoria = ?
+    `, [userId, categoria]);
+
+        await pool.query(
+            "UPDATE UserPurchasesLT SET isEquipped = 1 WHERE idUsuario = ? AND idItem = ?",
+            [userId, itemId]
+        );
+
+        res.json({ ok: true });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false });
+    }
+});
+
+
+app.patch("/api/shop/unequip", async (req, res) => {
+    try {
+        const { userId, itemId } = req.body;
+
+        await pool.query(
+            "UPDATE UserPurchasesLT SET isEquipped = 0 WHERE idUsuario = ? AND idItem = ?",
+            [userId, itemId]
+        );
+
+        res.json({ ok: true });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false });
+    }
+});
+
+
 // Dar lodux a un usuario (para admins o sistema de recompensas)
 app.post("/api/shop/grant-lodux", async (req, res) => {
     const connection = await pool.getConnection();
-    
+
     try {
         const { userId, monto, concepto } = req.body;
 
@@ -1016,8 +1068,8 @@ app.post("/api/shop/grant-lodux", async (req, res) => {
             [userId]
         );
 
-        res.json({ 
-            ok: true, 
+        res.json({
+            ok: true,
             msg: "Lodux otorgado exitosamente",
             nuevoSaldo: newBalance[0].lodux
         });

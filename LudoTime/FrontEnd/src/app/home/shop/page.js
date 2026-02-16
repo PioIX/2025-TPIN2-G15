@@ -94,6 +94,7 @@ export default function ShopPage() {
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [purchaseLoading, setPurchaseLoading] = useState(null);
+  const [equipLoading, setEquipLoading] = useState(null);
   const [message, setMessage] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -246,6 +247,37 @@ export default function ShopPage() {
     }
   };
 
+const handleEquip = async (item) => {
+  if (!userId) return;
+
+  setEquipLoading(item.idItem);
+
+  try {
+    const endpoint = item.equipped
+      ? "/api/shop/unequip"
+      : "/api/shop/equip";
+
+    await fetch(`${API_URL}${endpoint}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        itemId: item.idItem
+      })
+    });
+
+    const itemsRes = await fetch(`${API_URL}/api/shop/items/${userId}`);
+    const itemsData = await itemsRes.json();
+    if (itemsData.ok) setItems(itemsData.items);
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setEquipLoading(null);
+  }
+};
+
+
   const openModal = (item) => {
     setSelectedItem(item);
   };
@@ -343,9 +375,26 @@ export default function ShopPage() {
                         <span className={styles.itemPrice}>
                           💰 {item.precio}
                         </span>
-                        {item.comprado ? (
-                          <span className={styles.ownedBadge}>¡Es tuyo!</span>
-                        ) : (
+{item.comprado ? (
+  <>
+    <button
+      className={styles.buyButton}
+      onClick={() => handleEquip(item)}
+      disabled={equipLoading === item.idItem}
+    >
+      {equipLoading === item.idItem
+        ? "..."
+        : item.equipped
+          ? "Desequipar"
+          : "Equipar"}
+    </button>
+
+    {item.equipped && (
+      <span className={styles.ownedBadge}>⭐ Equipado</span>
+    )}
+  </>
+) : (
+
                           <button
                             className={styles.buyButton}
                             onClick={() => handlePurchase(item.idItem, item.precio, item.titulo)}
@@ -400,9 +449,26 @@ export default function ShopPage() {
               <h2 className={styles.modalTitle}>{selectedItem.titulo}</h2>
               <p className={styles.modalPrice}>💰 {selectedItem.precio} Lodux</p>
               
-              {selectedItem.comprado ? (
-                <div className={styles.modalOwned}>¡Ya lo tienes!</div>
-              ) : (
+{selectedItem.comprado ? (
+  <>
+    <button
+      className={styles.modalBuyButton}
+      onClick={() => handleEquip(selectedItem)}
+      disabled={equipLoading === selectedItem.idItem}
+    >
+      {equipLoading === selectedItem.idItem
+        ? "..."
+        : selectedItem.equipped
+          ? "Desequipar"
+          : "Equipar"}
+    </button>
+
+    {selectedItem.equipped && (
+      <div className={styles.modalOwned}>⭐ Equipado</div>
+    )}
+  </>
+) : (
+
                 <button
                   className={styles.modalBuyButton}
                   onClick={() => handlePurchase(selectedItem.idItem, selectedItem.precio, selectedItem.titulo)}
