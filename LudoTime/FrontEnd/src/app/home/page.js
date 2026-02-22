@@ -24,10 +24,9 @@ export default function Home() {
         router.push("/home/shop");
     };
 
-    const irAPuntajes = () => {
-        router.push("/home/scores");
-    };
-
+    // const irAPuntajes = () => {
+    //     router.push("/home/scores");
+    // };
 
 
 

@@ -40,6 +40,17 @@ export default function LocalPage() {
                             <span className={styles.desc}>El modo predeterminado de LUDOTIME!</span>
                         </div>
                     </button>
+
+                    <button
+                        className={`${styles.card} ${styles.statsbtn}`}
+                        onClick={() => router.push("/home/play/local/stats")}
+                    >
+                        <div className={styles.overlay}></div>
+                        <div className={styles.content}>
+                            <span className={styles.title}>ESTADISTICAS</span>
+                            <span className={styles.desc}>Fijate tus estadisticas!</span>
+                        </div>
+                    </button>
                 </div>
             </main>
         </div>

@@ -182,6 +182,18 @@ export default function LudoTimePage() {
         setGameState(newState);
     };
 
+    const winInstantly = () => {
+        const newPositions = { ...gameState.piecePositions };
+        newPositions[gameState.currentPlayer] = [58, 58, 58, 58];
+
+        setGameState(prev => ({
+            ...prev,
+            piecePositions: newPositions
+        }));
+
+        checkWinner(newPositions);
+    };
+
     const rollDice = () => {
         if (!gameState.canRoll) return;
 
@@ -242,11 +254,34 @@ export default function LudoTimePage() {
     const checkWinner = (positions) => {
         for (let playerId = 0; playerId < numPlayers; playerId++) {
             const playerPositions = positions[playerId];
+        
             if (playerPositions.every(pos => pos === 58)) {
+            
+                // 🔥 ACTUALIZAR ESTADISTICAS
+                const storedStats = localStorage.getItem("ludoStats");
+            
+                let stats = storedStats
+                    ? JSON.parse(storedStats)
+                    : {
+                        gamesPlayed: 0,
+                        wins: {
+                            0: 0,
+                            1: 0,
+                            2: 0,
+                            3: 0
+                        }
+                    };
+                
+                stats.gamesPlayed += 1;
+                stats.wins[playerId] += 1;
+                
+                localStorage.setItem("ludoStats", JSON.stringify(stats));
+                
                 setWinner(playerId);
                 return true;
             }
         }
+    
         return false;
     };
     
@@ -713,8 +748,22 @@ export default function LudoTimePage() {
                     <Dices size={36} />
                     {gameState.diceValue || 'Tirar'}
                 </button>
+
+                <button
+                    onClick={winInstantly}
+                    className={styles.diceButton}
+                    style={{
+                        background: 'linear-gradient(to right, #ef4444, #dc2626)',
+                        padding: '1rem 2rem',
+                        fontSize: '1rem'
+                    }}
+                >
+                    🏆 Victoria instantánea (TEST)
+                </button>
             </div>
             
+            
+
             <div className={styles.rulesContainer}>
                 <p className={styles.rulesTitle}>Reglas Modo TIME:</p>
                 <p className={styles.rulesText}>• Saca 6 para salir de la base</p>

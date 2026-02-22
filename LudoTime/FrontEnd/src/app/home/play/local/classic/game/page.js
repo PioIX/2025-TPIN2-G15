@@ -241,11 +241,34 @@ export default function LudoPage() {
     const checkWinner = (positions) => {
         for (let playerId = 0; playerId < numPlayers; playerId++) {
             const playerPositions = positions[playerId];
+        
             if (playerPositions.every(pos => pos === 58)) {
+            
+                // 🔥 ACTUALIZAR ESTADISTICAS
+                const storedStats = localStorage.getItem("ludoStats");
+            
+                let stats = storedStats
+                    ? JSON.parse(storedStats)
+                    : {
+                        gamesPlayed: 0,
+                        wins: {
+                            0: 0,
+                            1: 0,
+                            2: 0,
+                            3: 0
+                        }
+                    };
+                
+                stats.gamesPlayed += 1;
+                stats.wins[playerId] += 1;
+                
+                localStorage.setItem("ludoStats", JSON.stringify(stats));
+                
                 setWinner(playerId);
                 return true;
             }
         }
+    
         return false;
     };
 
@@ -615,7 +638,7 @@ export default function LudoPage() {
                     <Dices size={36} />
                     {gameState.diceValue || 'Tirar'}
                 </button>
-                {/*<button
+                <button
                     onClick={winInstantly}
                     className={styles.diceButton}
                     style={{
@@ -625,7 +648,7 @@ export default function LudoPage() {
                     }}
                 >
                     🏆 Victoria instantánea (TEST)
-                </button>*/}
+                </button>
             </div>
 
             <div className={styles.rulesContainer}>
