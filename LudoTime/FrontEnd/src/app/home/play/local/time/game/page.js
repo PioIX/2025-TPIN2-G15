@@ -251,16 +251,17 @@ export default function LudoTimePage() {
         return positions.some((pos, idx) => canMovePiece(playerId, idx));
     };
 
-    const checkWinner = (positions) => {
-        for (let playerId = 0; playerId < numPlayers; playerId++) {
-            const playerPositions = positions[playerId];
+    const checkWinner = (positions) => { //recibe como parametro las posiciones de las fichas de cada jugador
+        for (let playerId = 0; playerId < numPlayers; playerId++) { //recorre los jugadores
+            const playerPositions = positions[playerId]; //agarra las posiciones del jugador actual
         
-            if (playerPositions.every(pos => pos === 58)) {
+            if (playerPositions.every(pos => pos === 58)) { // si todas las fichas del jugador estan en la posicion 58 (meta) entonces gano
             
-                // 🔥 ACTUALIZAR ESTADISTICAS
+                // ACTUALIZAR ESTADISTICAS
                 const storedStats = localStorage.getItem("ludoStats");
             
-                let stats = storedStats
+                // si existe lo convierte en objeto, sino crea un objeto con valores en 0
+                let stats = storedStats 
                     ? JSON.parse(storedStats)
                     : {
                         gamesPlayed: 0,
@@ -272,17 +273,17 @@ export default function LudoTimePage() {
                         }
                     };
                 
-                stats.gamesPlayed += 1;
-                stats.wins[playerId] += 1;
+                stats.gamesPlayed += 1; //es un acumulador que va sumando + 1 por partida jugada
+                stats.wins[playerId] += 1; //es un acumulador que va sumando al jugador + 1 por victoria
                 
-                localStorage.setItem("ludoStats", JSON.stringify(stats));
+                localStorage.setItem("ludoStats", JSON.stringify(stats)); // convierte el objeto en texto y lo guarda en el navegador
                 
-                setWinner(playerId);
-                return true;
+                setWinner(playerId); //actualiza el estado del juego
+                return true; //si hubo ganador termino
             }
         }
     
-        return false;
+        return false; // sino termino significa que no hubo ganador todavia
     };
     
     const movePiece = async (pieceIndex) => {

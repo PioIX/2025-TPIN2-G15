@@ -19,7 +19,7 @@ export default function StatsPage() {
   useEffect(() => {
     const storedStats = localStorage.getItem("ludoStats");
     if (storedStats) {
-      setStats(JSON.parse(storedStats));
+      setStats(JSON.parse(storedStats)); // lo convierte de texto a objeto
     }
   }, []);
 
@@ -33,18 +33,23 @@ export default function StatsPage() {
   };
 
   const calcularPorcentaje = (wins, total) => {
-    if (!total || total === 0) return 0;
-    return Math.round((wins / total) * 100);
+    if (!total || total === 0) { // si total es nulo, undefined o igual a 0
+      return 0
+    }
+    return Math.round((wins / total) * 100); //redondea y calcula el porcentaje (entre wins y el total de partidas)
   };
 
+  // CALCULA EL JUGADOR CON MAS VICTORIAS
   const obtenerMaximo = () => {
-    if (!stats) return null;
-    const valores = Object.values(stats.wins);
-    const max = Math.max(...valores);
-    return valores.indexOf(max);
+    if (!stats) {
+      return null
+    }
+    const valores = Object.values(stats.wins); // agarra los valores/victorias de (stats.win) y se los guarda a valores
+    const max = Math.max(...valores); // devuelve el numero mas grande entre las wins
+    return valores.indexOf(max); // busca en que posicion esta el jugador con mas wins
   };
 
-  const jugadorTop = obtenerMaximo();
+  const jugadorTop = obtenerMaximo(); //guarda el id del jugador con mas victorias
 
   return (
     <main className={styles.container}>
@@ -61,10 +66,11 @@ export default function StatsPage() {
               Total de partidas: {stats.gamesPlayed}
             </div>
 
+            {/* MUESTRA CUAL ES EL JUGADOR CON MAS VICTORIAS */}
             {jugadorTop !== null && (
               <div className={styles.topPlayer}>
-                🏆 Jugador con más victorias:{" "}
-                {jugadorTop === 0
+                🏆 Jugador con más victorias: 
+                  {jugadorTop === 0
                   ? "🟢 Jugador 1"
                   : jugadorTop === 1
                   ? "🟡 Jugador 2"
@@ -74,19 +80,20 @@ export default function StatsPage() {
               </div>
             )}
 
-            {/* 🔥 RANKING ORDENADO */}
-            {Object.entries(stats.wins)
-              .map(([id, wins]) => ({
+            {/* ORDENAMOS EL RANKING DE MAS A MENOS VICTORIAS */}
+            {Object.entries(stats.wins) // convierte el objeto en array
+              .map(([id, wins]) => ({ // recorre un array y devuelve otro (se usa array porque los arrays se pueden ordenar, los objetos no)
                 id: Number(id),
                 wins,
               }))
-              .sort((a, b) => b.wins - a.wins)
-              .map((player, index) => {
+              .sort((a, b) => b.wins - a.wins) // ORDENA EL ARRAY SEGUN CUAL ES MAYOR
+              .map((player, index) => { //RECORREMOS EL ARRAY Y REALIZAMOS EL PORCENTAJE DE LAS STATS DE CADA JUGADOR
                 const porcentaje = calcularPorcentaje(
                   player.wins,
                   stats.gamesPlayed
                 );
-
+                
+                {/* SEGUN LA POSICION (index) CADA JUGADOR RECIBE UNA MEDALLA (SALVO EL 4to) */}
                 const medal =
                   index === 0
                     ? "🥇"
